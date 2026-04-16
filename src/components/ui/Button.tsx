@@ -15,13 +15,13 @@ export default function Button({label, isLoading, onClick, type = 'button', clas
          type={type}
          onClick={onClick}
          className={`
-          w-full py-3 px-6
+          w-full px-6
           bg-primary hover:bg-primary-hover
           text-white text-base font-semibold
           rounded-custom transition-all duration-200
           flex items-center justify-center
           disabled:opacity-70 disabled:cursor-not-allowed
-          cursor-pointer
+          cursor-pointer 
           ${className}
          `}
         >
