@@ -12,8 +12,6 @@ export default function LoginPage(){
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
-
-      
       let isEmailValid = true;
       let isPasswordValid = true;
       const newErrors = {email: "", password: ""};
@@ -23,12 +21,12 @@ export default function LoginPage(){
           isEmailValid = false;
       }
 
-        if(!formData.password){
+     if(!formData.password){
             newErrors.password = "Password is required";
             isPasswordValid = false;
         }
 
-        if(isPasswordValid && formData.password.length < 6){
+     if(isPasswordValid && formData.password.length < 6){
             newErrors.password = "Password is too short";
             isPasswordValid = false;
         }
@@ -36,33 +34,35 @@ export default function LoginPage(){
         setErrors(newErrors);
 
       if(isPasswordValid && isEmailValid){
+          try {
+              setLoading(true);
+              const response = await fetch("/api/auth/login", {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify(formData)
 
-          const response = await fetch("/api/auth/login", {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json"
-              },
-              body: JSON.stringify(formData)
+              })
 
-          })
+              const result = await response.json();
 
-          const result = await response.json();
+              if(response.ok){
+                  //redirect dashboard
+                  console.log("Success! Token:", result.token);
 
-          if(response.ok){
-              //redirect dashboard
-              console.log("Success! Token:", result.token);
-          }else {
+              }else {
 
-              console.log("Login Failed:", result.message);
-              setErrors({ ...errors, email: result.message || "Login failed" });
+                  console.log("Login Failed:", result.message);
+                  setErrors({ ...errors, email: result.message || "Login failed" });
+              }
+          }catch(err){
+              console.log("Login Failed:", err);
+          }finally{
+              setLoading(false);
           }
-
-          setLoading(true);
       }
 
-      setTimeout(() => {
-          setLoading(false);
-      }, 2000);
     }
 
     return (
@@ -118,8 +118,7 @@ export default function LoginPage(){
                        </label>
                         <a href="#" className="text-sm text-primary hover:underline">Forgot Password?</a>
                     </div>
-
-                    <Button label="Login" type="submit" isLoading={loading} />
+                    <Button label="Login" type="submit" isLoading={loading} className="h-13" />
                 </form>
                 <p className="mt-8 text-center text-sm text-gray-600">
                     Don&#39;t have an account?{" "}
