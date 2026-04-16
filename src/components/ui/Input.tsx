@@ -1,6 +1,6 @@
 'use client'
 
-import {useState} from "react";
+import React, {useState} from "react";
 import { Eye, EyeOff } from "lucide-react"
 
 interface InputProps {
@@ -10,9 +10,10 @@ interface InputProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     id: string;
     error?: string;
+    className?: string;
 }
 
-export default function Input({label, type="text", value, onChange, id, error}:InputProps) {
+export default function Input({label, type="text", value, onChange, id, error, className=''}:InputProps) {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === 'password';
 
@@ -28,9 +29,10 @@ export default function Input({label, type="text", value, onChange, id, error}:I
             />
             <label
              htmlFor={id}
-             className="absolute left-4 top-3 text-gray-400 text-base transition-all pointer-events-none
+             className={`absolute left-4 top-3 text-gray-400 text-base transition-all pointer-events-none
              peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-sm peer-focus:text-primary peer-focus:bg-white peer-focus:px-1
-             peer-focus:[:not(placehold-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:text-primary peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1"
+             peer-focus:[:not(placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:text-primary peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1
+            ${className}`}
             >
                 {label}
             </label>
@@ -41,7 +43,7 @@ export default function Input({label, type="text", value, onChange, id, error}:I
                  onClick={() => setShowPassword(!showPassword)}
                  className="absolute right-4 top-3.5 text-gray-400 hover:text-primary transition-colors"
                 >
-                    {showPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
+                    {showPassword ? <Eye size={20}/> : <EyeOff size={20}/>}
                 </button>
             )}
             {error && <span className="text-red-500 text-xs mt-1">{error}</span>}
