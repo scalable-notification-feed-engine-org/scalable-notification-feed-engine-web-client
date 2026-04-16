@@ -9,9 +9,10 @@ interface InputProps {
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     id: string;
+    error?: string;
 }
 
-export default function Input({label, type="text", value, onChange, id}:InputProps) {
+export default function Input({label, type="text", value, onChange, id, error}:InputProps) {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === 'password';
 
@@ -43,6 +44,7 @@ export default function Input({label, type="text", value, onChange, id}:InputPro
                     {showPassword ? <EyeOff size={20}/> : <Eye size={20}/>}
                 </button>
             )}
+            {error && <span className="text-red-500 text-xs mt-1">{error}</span>}
         </div>
     );
 
