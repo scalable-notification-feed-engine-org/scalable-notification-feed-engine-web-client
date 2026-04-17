@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useSearchParams, useRouter } from 'next/navigation';
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import apiClient from "@/lib/api-client";
 
 export default function ResetPasswordPage() {
     const searchParams = useSearchParams();
@@ -13,9 +14,11 @@ export default function ResetPasswordPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState({otp: "", newPassword: "", confirmPassword: ""});
     const [message, setMessage] = useState("");
+    const [apiError, setApiError] = useState("");
 
     const handleReset = async (e: React.FormEvent) => {
         e.preventDefault();
+        setApiError("");
         let isValid = true;
         const newErrors = {otp: "", newPassword: "", confirmPassword: "" };
 
@@ -48,19 +51,17 @@ export default function ResetPasswordPage() {
 
             try {
                 setLoading(true);
-                const url = `http://localhost:8000/visitors/reset-password?email=${email}&otp=${formData.otp}&newPassword=${formData.newPassword}`;
+                await apiClient.post(`/users/visitors/reset-password`, {
+                    email: email,
+                    otp: formData.otp,
+                    newPassword: formData.newPassword
+                });
 
-                const response = await fetch(url, {method: "POST"});
-                const result = await response.json();
-
-                if (response.ok) {
                     alert("Password reset successful! Please login.");
-                    router.push("/login");
-                } else {
-                    setError(result.message || "Reset failed. Check your OTP.");
-                }
+                    await router.push("/login");
+
             } catch (err) {
-                console.log(err);
+                setApiError(err.response?.data?.message || "Invalid OTP or request expired.");
             } finally {
                 setLoading(false);
             }
@@ -73,6 +74,11 @@ export default function ResetPasswordPage() {
             <p className="text-gray-600 mb-6">
                 Enter your email address and we&#39;ll send you a link to reset your password.
             </p>
+            {apiError && (
+                <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+                    {apiError}
+                </div>
+            )}
 
             {message ? (
                 <div className="p-4 mb-4 text-sm text-red-700 bg-green-100 rounded-lg">
