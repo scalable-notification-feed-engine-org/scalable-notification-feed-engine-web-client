@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
 import Input from "@/components/ui/Input";
+import apiClient from "@/lib/api-client";
 
 
 export default function ForgotPasswordPage() {
@@ -24,23 +25,12 @@ export default function ForgotPasswordPage() {
 
         if(isValid) {
             try {
-
-                const url = `http://localhost:9092/forgot-password-request-code?email=${email}`;
                 setLoading(true);
-                const response = await fetch(url, {
-                    method: "POST",
-                });
-
-                if (response.ok) {
-                    setMessage("If an account exists for this email, you will receive a reset link shortly.");
-                } else {
-                    setMessage("Something went wrong. Please try again.");
-                }
-
-                console.log("message " , message);
+                await apiClient.post(`/forgot-password-request-code?email=${email}`)
+                setMessage("If an account exists for this email, you will receive a reset link shortly.");
 
             }catch(err){
-                console.log(err);
+                setMessage("Something went wrong. Please try again.");
             }finally {
                 setLoading(false);
             }
