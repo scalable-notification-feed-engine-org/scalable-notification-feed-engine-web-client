@@ -13,6 +13,7 @@ export interface User {
 
 interface AuthContextType {
     user: User | null;
+    token: () => string;
     login: (token: string, userData: User) => void;
     logout: () => void;
     isAuthenticated: boolean;
@@ -61,6 +62,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         router.push('/dashboard');
     };
 
+    const token = ():string => {
+        const token = Cookies.get('auth_token');
+        if (token) {
+            return token;
+        }
+        return '';
+    }
+
     const logout = () => {
         Cookies.remove('auth_token');
         localStorage.removeItem('user_data');
@@ -69,8 +78,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
+
         <AuthContext.Provider value={{
             user,
+            token,
             login,
             logout,
             isAuthenticated: !!user,
