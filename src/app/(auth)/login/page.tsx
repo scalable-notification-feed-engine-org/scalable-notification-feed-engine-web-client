@@ -42,14 +42,16 @@ export default function LoginPage(){
           try {
               setLoading(true);
              const response =  await apiClient.post(`/users/visitors/login`, formData);
-                  const { accessToken,user } = response.data;
+             console.log("response", response.data);
+                  const { accessToken,user } = response.data.data;
+                  console.log("Access Token: ", accessToken);
                   if(accessToken){
                       login(accessToken, user)
                   }
 
           }catch(err){
               console.log("Login Failed:", err);
-             const message =   err.response?.data.message || 'Invalid email or password';
+             const message =   'Invalid email or password';
              setApiError(message);
           }finally{
               setLoading(false);
