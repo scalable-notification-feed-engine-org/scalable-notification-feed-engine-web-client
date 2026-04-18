@@ -1,8 +1,8 @@
 'use client';
 
 import React, {createContext, useContext, useState, useEffect, useMemo} from 'react';
-import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import {useSocket} from "@/context/common/SocketContext";
 
 
 interface Notification {
@@ -22,55 +22,68 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const { token, user } = useAuth();
-    const [socket, setSocket] = useState<Socket | null>(null);
+    const socket = useSocket();
+    const { token } = useAuth();
+
 
     useEffect(() => {
+
+        const tokenValue = typeof token === 'function' ? token() : token;
+
+        console.log("🔄 Effect Triggered. Token found:", !!tokenValue);
+
         const fetchNotifications = async () => {
+            if (!tokenValue) {
+                console.log(" Fetch skipped: Token is null");
+                return;
+            }
 
-            const tokenValue = typeof token === 'function' ? token() : token;
-
-            if (!tokenValue) return;
             try {
+                console.log("📡 Fetching from DB...");
                 const res = await fetch(`http://localhost:5000/api/notifications`, {
-                    headers: { Authorization: `Bearer ${tokenValue}` }
+                    headers: {
+                        Authorization: `Bearer ${tokenValue}`,
+                        'Cache-Control': 'no-cache'
+                    }
                 });
-                console.log("Response " , res);
+
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+
                 const data = await res.json();
                 const notificationsArray = Array.isArray(data) ? data : (data.notifications || []);
+
+                console.log("✅ Successfully fetched from DB:", notificationsArray.length, "items");
                 setNotifications(notificationsArray);
+
             } catch (err) {
-                console.error("Failed to fetch notifications", err);
+                console.error(" Failed to fetch notifications:", err);
             }
         };
 
         fetchNotifications();
+
+
     }, [token]);
 
-
     useEffect(() => {
-        const tokenValue = typeof token === 'function' ? token() : token;
-        if (token() && user) {
-            const newSocket = io("http://localhost:5000", {
-                auth: { token:tokenValue },
-                transports: ["websocket"]
-            });
 
-            newSocket.on('connect', () => console.log("✅ Socket Connected"));
+        if (!socket) return;
 
-            newSocket.on('new_notification', (notif: Notification) => {
-                setNotifications(prev => [notif, ...prev]);
+        const userId = "bbd0de35-23ed-4a86-929d-e19bb983057a";
 
-            });
+        socket.emit("join",userId)
 
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setSocket(newSocket);
+        socket.on("notification", (notification: Notification) => {
+            setNotifications(prev => [notification, ...prev])
+        });
+        console.log("Response " , notifications);
 
-            return () => {
-                newSocket.disconnect();
-            };
+        return () => {
+            socket.off("notification")
         }
-    }, [token, user]);
+
+    }, [socket]);
+
 
 
     const markAsRead = async (id: string) => {
