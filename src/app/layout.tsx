@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import {NotificationProvider} from "@/context/NotificationContext";
 import {SocketProvider} from "@/context/common/SocketContext";
 import React from "react";
+import ToastProvider from "@/context/ToastContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
       <AuthProvider>
         <SocketProvider>
         <NotificationProvider>
+          <ToastProvider/>
           <main>{children}</main>
         </NotificationProvider>
         </SocketProvider>
