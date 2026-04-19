@@ -22,16 +22,16 @@ export const NotificationBell = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleNotificationClick = async (id: string, targetId?: string) => {
+    const handleNotificationClick = async (id: string) => {
 
         await markAsRead(id);
 
 
         setIsOpen(false);
 
-        if (targetId) {
-            router.push(`/posts/${targetId}`);
-        }
+        // if (targetId) {
+        //     router.push(`/posts/${targetId}`);
+        // }
     };
 
     return (
@@ -64,7 +64,7 @@ export const NotificationBell = () => {
                             notifications.map((notification) => (
                                 <div
                                     key={notification._id}
-                                    onClick={() => handleNotificationClick(notification._id, notification._id)}
+                                    onClick={() => handleNotificationClick(notification._id)}
                                     className={`p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition flex flex-col gap-1 ${!notification.isRead ? 'bg-blue-50/50 border-l-4 border-l-blue-500' : ''}`}
                                 >
                                     <p className={`text-sm ${!notification.isRead ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
