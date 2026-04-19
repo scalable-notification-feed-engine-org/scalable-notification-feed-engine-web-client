@@ -3,6 +3,8 @@
 import React, {createContext, useContext, useState, useEffect, useMemo} from 'react';
 import { useAuth } from './AuthContext';
 import {useSocket} from "@/context/common/SocketContext";
+import toast from "react-hot-toast";
+import {jwtDecode} from "jwt-decode";
 
 
 interface Notification {
@@ -16,12 +18,19 @@ interface NotificationContextType {
     notifications: Notification[];
     unreadCount: number;
     markAsRead: (id: string) => Promise<void>;
+    status: Record<string, string>;
+}
+
+interface Status {
+    userId: string,
+    status:  string
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [status, setStatus] = useState<Record<string, string>>({});
     const socket = useSocket();
     const { token } = useAuth();
 
@@ -29,6 +38,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     useEffect(() => {
 
         const tokenValue = typeof token === 'function' ? token() : token;
+
 
         console.log("🔄 Effect Triggered. Token found:", !!tokenValue);
 
@@ -66,15 +76,26 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     }, [token]);
 
     useEffect(() => {
-
+        const tokenValue = typeof token === 'function' ? token() : token;
         if (!socket) return;
 
-        const userId = "bbd0de35-23ed-4a86-929d-e19bb983057a";
+        const jwtPayload = jwtDecode(tokenValue);
+        const userId =  jwtPayload.sub;
 
         socket.emit("join",userId)
 
         socket.on("notification", (notification: Notification) => {
             setNotifications(prev => [notification, ...prev])
+            toast.success("New notification received");
+        });
+
+        socket.on("user_status_changed",  (data: Status) => {
+            console.log("user_status_changed", data);
+           setStatus(prev => ({
+               ...prev,
+               [data.userId!]: data.status
+           }));
+
         });
         console.log("Response " , notifications);
 
@@ -89,6 +110,8 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     const markAsRead = async (id: string) => {
         const tokenValue = typeof token === 'function' ? token() : token;
         try {
+
+            console.log("User id " , id)
             await fetch (`http://localhost:5000/api/notifications/${id}/read`, {
                 method: 'PATCH',
                 headers: { Authorization: `Bearer ${tokenValue}` }
@@ -109,7 +132,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     }, [notifications]);
 
     return (
-        <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead }}>
+        <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, status }}>
             {children}
         </NotificationContext.Provider>
     );
