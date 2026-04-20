@@ -1,28 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+
+  --background: #f8fafc;
+  --foreground: #0f172a;
+
+  --card: #ffffff;
+  --border: #e2e8f0; /* Slate 200 */
+
+  /* Brand Colors */
+  --primary: #4f46e5; /* Indigo 600 - Professional standard */
+  --primary-hover: #4338ca;
+
+  /* Text Styles */
+  --text-muted: #64748b; /* Slate 500 */
 }
 
 @theme inline {
+  /* Color Mapping */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
+  --color-card: var(--card);
+  --color-border-subtle: var(--border);
 
-  --radius-custom: 1rem;
+  --color-brand: var(--primary);
+  --color-brand-hover: var(--primary-hover);
+  --color-muted: var(--text-muted);
+
+  /* Elevation & Shape */
+  --radius-saas: 0.75rem; /* 12px - Modern standard */
+  --shadow-saas: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #020617; /* Slate 950 */
+    --foreground: #f8fafc;
+    --card: #0f172a;
+    --border: #1e293b;
+    --text-muted: #94a3b8;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif; /* SaaS standard typography */
+  -webkit-font-smoothing: antialiased;
 }
