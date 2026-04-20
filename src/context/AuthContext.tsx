@@ -9,6 +9,7 @@ export interface User {
     email: string;
     roles: string[];
     tenantId?: string;
+    firstName?: string;
 }
 
 interface AuthContextType {
