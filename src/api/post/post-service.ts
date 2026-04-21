@@ -2,6 +2,7 @@ import {Post} from "@/types/post";
 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3002/post';
+const FEED_API_URL = process.env.NEXT_PUBLIC_FEED_SERVICE_URL || 'http://localhost:3003';
 
 export const postService = {
 
@@ -19,14 +20,16 @@ export const postService = {
    },
 
    async getPosts(userId:string): Promise<Post[]>{
-        const response = await fetch(`${API_BASE_URL}?userId=${userId}`, {
+        const response = await fetch(`${FEED_API_URL}/${userId}`, {
             method: 'GET',
             headers: {"Content-Type": "application/json"},
 
         });
+
         if (!response.ok) {
             throw new Error("Failed to get posts");
         }
+
         return response.json();
   },
 
