@@ -9,9 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@apollo/client": "^4.1.9",
     "axios": "^1.15.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.4.2",
+    "graphql": "^16.13.2",
     "jose": "^6.2.2",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
