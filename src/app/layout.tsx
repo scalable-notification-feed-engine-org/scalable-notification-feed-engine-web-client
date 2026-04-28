@@ -6,6 +6,7 @@ import {NotificationProvider} from "@/context/NotificationContext";
 import {SocketProvider} from "@/context/common/SocketContext";
 import React from "react";
 import ToastProvider from "@/context/ToastContext";
+import {ApolloWrapper} from "@/context/ApolloWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,12 +35,14 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
       <AuthProvider>
+        <ApolloWrapper>
         <SocketProvider>
         <NotificationProvider>
           <ToastProvider/>
           <main>{children}</main>
         </NotificationProvider>
         </SocketProvider>
+          </ApolloWrapper>
       </AuthProvider>
 
       </body>
