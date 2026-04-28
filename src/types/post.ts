@@ -1,29 +1,23 @@
-export interface Post {
+export interface User {
     id: string;
-    content: string;
-    userId: string;
-    tenantId: string;
-    likeCount: number;
-    commentCount: number;
-    isLiked: boolean;
-    mediaUrls: string[];
-    createdAt: string | Date;
-    updatedAt: string | Date;
-    comments: PostComment[];
-
-    _count?: {
-        likes: number;
-        comments: number;
-    };
-
-    user?: {
-        name: string;
-        avatar?: string;
-    };
+    firstName: string;
+    email?: string;
+    avatarUrl: string;
 }
 
 export interface PostComment {
     id: string;
     content: string;
     userId: string;
+}
+
+export interface Post {
+    id: string;
+    content: string;
+    mediaUrls: string[];
+    createAt: string | Date;
+    likeCount: number;
+    commentCount: number;
+    author: User;
+    comments?: PostComment[];
 }
