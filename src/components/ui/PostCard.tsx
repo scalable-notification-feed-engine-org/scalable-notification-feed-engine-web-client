@@ -4,6 +4,7 @@ import { Heart, MessageSquare, MoreHorizontal, Share2, Send } from "lucide-react
 import { useState } from "react";
 import { postService } from "@/api/post/post-service";
 import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
 
 interface PostCardProps {
     post: Post;
@@ -44,19 +45,26 @@ export const PostCard = ({ post, onLikeToggle, onCommentAdded }: PostCardProps) 
     return (
         <div className="bg-card border border-border-subtle rounded-saas shadow-saas p-5 mb-6 transition-all hover:border-brand/30">
             <div className="flex gap-4">
-                {/* User Avatar */}
                 <div className="h-10 w-10 rounded-full bg-brand/10 border border-brand/20 flex-shrink-0 flex items-center justify-center font-bold text-brand">
-                    {post.userId.substring(0, 2).toUpperCase()}
+                    {post.author?.avatarUrl ? (
+                        <Image src={post.author.avatarUrl} alt={post.author.firstName} className="w-full h-full object-cover" width="100" height="100"/>
+                    ) : (
+                        <div className="w-full h-full bg-brand/10 flex items-center justify-center font-bold text-brand">
+                            {post.author?.firstName?.substring(0, 2).toUpperCase() || "??"}
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex-1">
                     {/* Header */}
                     <div className="flex justify-between items-start mb-2">
                         <div>
-                            <h4 className="font-semibold text-sm text-foreground">User {post.userId.split('-')[0]}</h4>
+                            <h4 className="font-semibold text-sm text-foreground">
+                                {post.author?.firstName || `User ${post.author.id.split('-')[0]}`}
+                            </h4>
                             <span className="text-muted text-[11px] font-medium tracking-tight">
-    {post.createdAt && !isNaN(new Date(post.createdAt).getTime())
-        ? `${formatDistanceToNow(new Date(post.createdAt))} ago`
+    {post.createAt && !isNaN(new Date(post.createAt).getTime())
+        ? `${formatDistanceToNow(new Date(post.createAt))} ago`
         : "Just now"}
 </span>
                         </div>
@@ -65,22 +73,22 @@ export const PostCard = ({ post, onLikeToggle, onCommentAdded }: PostCardProps) 
                         </button>
                     </div>
 
-                    {/* Content */}
+
                     <p className="text-foreground/90 text-sm leading-relaxed mb-4 whitespace-pre-wrap">
                         {post.content}
                     </p>
 
-                    {/* Actions */}
+
                     <div className="flex gap-4 border-t border-border-subtle pt-4 mt-2">
-                        <button
-                            onClick={() => onLikeToggle(post.id)}
-                            className={`flex items-center gap-2 transition-all text-xs font-semibold group/btn active:scale-95 ${post.isLiked ? 'text-red-500' : 'text-muted hover:text-brand'}`}
-                        >
-                            <div className={`p-1.5 rounded-md ${post.isLiked ? 'bg-red-50' : 'group-hover/btn:bg-brand/10'}`}>
-                                <Heart size={16} fill={post.isLiked ? "currentColor" : "none"} />
-                            </div>
-                            <span>{post.likeCount ?? 0} Likes</span>
-                        </button>
+                        {/*<button*/}
+                        {/*    onClick={() => onLikeToggle(post.id)}*/}
+                        {/*    className={`flex items-center gap-2 transition-all text-xs font-semibold group/btn active:scale-95 ${post.isLiked ? 'text-red-500' : 'text-muted hover:text-brand'}`}*/}
+                        {/*>*/}
+                        {/*    /!*<div className={`p-1.5 rounded-md ${post.isLiked ? 'bg-red-50' : 'group-hover/btn:bg-brand/10'}`}>*!/*/}
+                        {/*    /!*    <Heart size={16} fill={post.isLiked ? "currentColor" : "none"} />*!/*/}
+                        {/*    /!*</div>*!/*/}
+                        {/*    <span>{post.likeCount ?? 0} Likes</span>*/}
+                        {/*</button>*/}
 
                         <button
                             onClick={() => setShowCommentInput(!showCommentInput)}
@@ -97,11 +105,11 @@ export const PostCard = ({ post, onLikeToggle, onCommentAdded }: PostCardProps) 
                         </button>
                     </div>
 
-                    {/* 💬 Comments Section */}
+
                     {showCommentInput && (
                         <div className="mt-4 pt-4 border-t border-border-subtle animate-in fade-in duration-300">
 
-                            {/* 1. Comment Input Field */}
+
                             <div className="flex gap-2 mb-4">
                                 <input
                                     type="text"
