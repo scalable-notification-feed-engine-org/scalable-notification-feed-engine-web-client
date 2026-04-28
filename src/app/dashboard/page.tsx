@@ -1,23 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useNotifications } from '@/context/NotificationContext';
-import { useAuth } from "@/context/AuthContext";
-import { Post } from "@/types/post";
-import { postService } from "@/api/post/post-service";
-import { PostList } from "@/components/ui/PostList";
-import { CreatePostBox } from "@/components/ui/CreatePostBox"; // 👈 මෙය Import කරන්න
+import {useEffect, useState} from 'react';
+import {useNotifications} from '@/context/NotificationContext';
+import {useAuth} from "@/context/AuthContext";
+import {Post} from "@/types/post";
+import {PostList} from "@/components/ui/PostList";
+import {CreatePostBox} from "@/components/ui/CreatePostBox";
+import {useQuery} from "@apollo/client/react";
+import {GET_FEED} from "@/lib/graphql/queries"; //
 
 export interface User {
     id: string;
     firstName: string;
+}
+interface GetFeedData {
+    getFeed: Post[];
 }
 
 export default function Dashboard() {
     const [users, setUsers] = useState<User[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
     const [isPostsLoading, setIsPostsLoading] = useState(true);
-
+    const {data} = useQuery<GetFeedData>(GET_FEED, {fetchPolicy: 'network-only'});
     const { status } = useNotifications();
     const { token, user } = useAuth();
 
@@ -33,13 +37,8 @@ export default function Dashboard() {
                 });
                 const userData = await userRes.json();
                 setUsers(Array.isArray(userData.data) ? userData.data : []);
+                 console.log("User query " , data);
 
-                // 2. Fetch Posts
-                if (user?.id) {
-                    const postsData = await postService.getPosts(user.id);
-                    console.log("Fetch all post data" , postsData);
-                    setPosts(postsData);
-                }
             } catch (err) {
                 console.error("Dashboard data fetch error:", err);
             } finally {
@@ -59,7 +58,7 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto p-6 flex flex-col md:flex-row gap-8">
 
             <div className="flex-1">
-                <h1 className="text-2xl font-bold mb-6">Activity Feed 🚀</h1>
+                <h1 className="text-2xl font-bold mb-6">Activity Feed</h1>
 
 
                 <CreatePostBox onPostCreated={handlePostCreated} />
@@ -67,7 +66,7 @@ export default function Dashboard() {
                 {isPostsLoading ? (
                     <div className="text-center py-10 italic text-muted">Loading posts...</div>
                 ) : (
-                    <PostList initialPosts={posts} />
+                    <PostList initialPosts={data?.getFeed || []} />
                 )}
             </div>
 
