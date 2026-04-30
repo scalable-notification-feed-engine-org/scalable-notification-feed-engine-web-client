@@ -28,11 +28,9 @@ export const PostList = ({ initialPosts }: PostListProps) => {
         setPosts(currentPosts =>
             currentPosts.map(post => {
                 if (post.id === postId) {
-                    const isLiked = !post.isLiked;
                     return {
                         ...post,
-                        isLiked,
-                        likeCount: isLiked ? (post.likeCount || 0) + 1 : Math.max(0, (post.likeCount || 0) - 1)
+                        likeCount:(post.likeCount || 0) + 1
                     };
                 }
                 return post;
