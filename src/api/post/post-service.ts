@@ -11,6 +11,7 @@ export const postService = {
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(data),
       });
+
      if (!response.ok) {
          throw new Error("Failed to create post");
      }
@@ -25,7 +26,7 @@ export const postService = {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({userId}),
         });
-        console.log("Response:", response.status);
+
         if (!response.ok) {
             throw new Error("Failed to get posts");
         }
@@ -41,7 +42,7 @@ export const postService = {
       }
 
         try {
-            console.log("User data " , createCommentDto.userId)
+
             const response= await fetch(`${API_BASE_URL}/${postId}/comment`, {
                method: 'POST',
                headers: {"Content-Type": "application/json"},
