@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import {useTenantStore} from "@/store/useTenantStore";
 
 const apiClient = axios.create({
     baseURL: "http://localhost:9090/api/v1",
@@ -11,9 +12,15 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
     (config) => {
         const token = Cookies.get('auth_token');
+        const status = useTenantStore.getState();
+        const tenantId = status.activeTenant?.id;
 
         if(token){
           config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        if (tenantId) {
+            config.headers['X-Tenant-ID'] = tenantId;
         }
         return config;
     },
@@ -32,5 +39,6 @@ apiClient.interceptors.response.use(
             return Promise.reject(error)
     }
 );
+
 
 export default apiClient;
