@@ -53,11 +53,11 @@ export default function RegisterPage(){
             try {
                  setLoading(true);
                  await apiClient.post(`/users/visitors/signup`, formData)
-                 await router.push(`/verify-email?email=${formData.email}`);
+                 router.push(`/verify-email?email=${formData.email}`);
 
 
             }catch(err){
-                const msg = err.response?.data?.message || "Registration failed. Try again.";
+                const msg = err.response?.data?.message  || "Registration failed. Try again.";
                setApiError(msg)
             }
 
@@ -185,7 +185,7 @@ export default function RegisterPage(){
 
                 <p className="mt-8 text-center text-sm text-gray-600">
                     I already have an account?{" "}
-                    <a href="#" className="text-primary font-semibold hover:underline">Login</a>
+                    <a href="/login" className="text-primary font-semibold hover:underline">Login</a>
                 </p>
 
             </div>
