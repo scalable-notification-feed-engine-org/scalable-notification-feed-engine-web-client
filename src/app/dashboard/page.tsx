@@ -3,11 +3,14 @@
 import {useEffect, useState} from 'react';
 import {useNotifications} from '@/context/NotificationContext';
 import {useAuth} from "@/context/AuthContext";
+import {useTenantStore} from "@/store/useTenantStore"; 
 import {Post} from "@/types/post";
 import {PostList} from "@/components/ui/PostList";
 import {CreatePostBox} from "@/components/ui/CreatePostBox";
 import {useQuery} from "@apollo/client/react";
-import {GET_FEED} from "@/lib/graphql/queries"; //
+import {GET_FEED} from "@/lib/graphql/queries";
+import GroupSwitcher from "@/components/ui/GroupSwitcher";
+
 
 export interface User {
     id: string;
@@ -21,23 +24,37 @@ export default function Dashboard() {
     const [users, setUsers] = useState<User[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
     const [isPostsLoading, setIsPostsLoading] = useState(true);
-    const {data} = useQuery<GetFeedData>(GET_FEED, {fetchPolicy: 'network-only'});
+    const { activeTenant } = useTenantStore(); 
     const { status } = useNotifications();
     const { token, user } = useAuth();
+    
+    const {data} = useQuery<GetFeedData>(GET_FEED, {
+        fetchPolicy: 'network-only',
+        context: {
+            headers: {
+                "X-Tenant-ID": activeTenant?.id 
+            }
+        },
+        skip: !activeTenant 
+    });
 
     useEffect(() => {
         const fetchData = async () => {
             const tokenValue = typeof token === 'function' ? token() : token;
-            if (!tokenValue) return;
+          
+            if (!tokenValue || !activeTenant) return;
 
             try {
-                // 1. Fetch Users
+                
                 const userRes = await fetch('http://localhost:9090/api/v1/users/get-all-user-details', {
-                    headers: { 'Authorization': `Bearer ${tokenValue}` }
+                    headers: {
+                        'Authorization': `Bearer ${tokenValue}`,
+                        'X-Tenant-ID': activeTenant.id
+                    }
                 });
                 const userData = await userRes.json();
                 setUsers(Array.isArray(userData.data) ? userData.data : []);
-                 console.log("User query " , data);
+                console.log("Current Tenant Data: ", data);
 
             } catch (err) {
                 console.error("Dashboard data fetch error:", err);
@@ -47,7 +64,7 @@ export default function Dashboard() {
         };
 
         fetchData();
-    }, [token, user?.id]);
+    }, [token, user?.id, activeTenant, data]);
 
 
     const handlePostCreated = (newPost: Post) => {
@@ -57,16 +74,32 @@ export default function Dashboard() {
     return (
         <div className="max-w-6xl mx-auto p-6 flex flex-col md:flex-row gap-8">
 
+
+            <div className="w-full md:w-64 shrink-0">
+                <GroupSwitcher />
+                <button className="mt-4 w-full py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-sm">
+                    + Create Group
+                </button>
+            </div>
+
             <div className="flex-1">
-                <h1 className="text-2xl font-bold mb-6">Activity Feed</h1>
+                <h1 className="text-2xl font-bold mb-6">
+                    {activeTenant ? `${activeTenant.name} Feed` : 'Activity Feed'}
+                </h1>
 
-
-                <CreatePostBox onPostCreated={handlePostCreated} />
-
-                {isPostsLoading ? (
-                    <div className="text-center py-10 italic text-muted">Loading posts...</div>
+                {activeTenant ? (
+                    <>
+                        <CreatePostBox onPostCreated={handlePostCreated} />
+                        {isPostsLoading ? (
+                            <div className="text-center py-10 italic text-muted">Loading posts...</div>
+                        ) : (
+                            <PostList initialPosts={data?.getFeed || []} />
+                        )}
+                    </>
                 ) : (
-                    <PostList initialPosts={data?.getFeed || []} />
+                    <div className="text-center py-20 border-2 border-dashed rounded-xl">
+                        <p className="text-muted italic">Please select a group to view the feed.</p>
+                    </div>
                 )}
             </div>
 
