@@ -10,6 +10,7 @@ import {CreatePostBox} from "@/components/ui/CreatePostBox";
 import {useQuery} from "@apollo/client/react";
 import {GET_FEED} from "@/lib/graphql/queries";
 import GroupSwitcher from "@/components/ui/GroupSwitcher";
+import {CreateGroupForm} from "@/components/ui/CreateGroupForm";
 
 
 export interface User {
@@ -24,6 +25,7 @@ export default function Dashboard() {
     const [users, setUsers] = useState<User[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
     const [isPostsLoading, setIsPostsLoading] = useState(true);
+    const [showForm, setShowForm] = useState(false);
     const { activeTenant } = useTenantStore(); 
     const { status } = useNotifications();
     const { token, user } = useAuth();
@@ -77,9 +79,13 @@ export default function Dashboard() {
 
             <div className="w-full md:w-64 shrink-0">
                 <GroupSwitcher />
-                <button className="mt-4 w-full py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-sm">
+                <button className="mt-4 w-full py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-sm" onClick={() => setShowForm(!showForm)}>
                     + Create Group
                 </button>
+                {showForm && (
+                    <CreateGroupForm/>
+                )}
+
             </div>
 
             <div className="flex-1">
