@@ -39,7 +39,7 @@ const errorLink = new ApolloLink((operation, forward) => {
 const authLink = new ApolloLink((operation, forward) =>{
 
     const token = Cookies.get('auth_token');
-    console.log("TOKEN",token);
+
 
     operation.setContext(({headers = {} }) => ({
         headers: {
