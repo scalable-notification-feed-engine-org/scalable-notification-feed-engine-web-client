@@ -7,7 +7,6 @@ const httpLink = new HttpLink({
 });
 
 const errorLink = new ApolloLink((operation, forward) => {
-    console.log("hello")
     return new Observable((observer) => {
            const subscription = forward(operation).subscribe({
 
