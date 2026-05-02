@@ -4,6 +4,7 @@ import {useRouter} from "next/navigation";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import apiClient from "@/lib/api-client";
+import axios from "axios";
 
 export default function RegisterPage(){
     const [formData, setFormData] = useState({firstName:"", lastName:"", email: "", password: "", contact:""});
@@ -57,8 +58,10 @@ export default function RegisterPage(){
 
 
             }catch(err){
-                const msg = err.response?.data?.message  || "Registration failed. Try again.";
-               setApiError(msg)
+                if(axios.isAxiosError(err)) {
+                    const msg = err.response?.data?.message || "Registration failed. Try again.";
+                    setApiError(msg)
+                }
             }
 
             setLoading(false);
