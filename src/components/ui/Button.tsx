@@ -16,8 +16,8 @@ export default function Button({label, isLoading, onClick, type = 'button', clas
          onClick={onClick}
          className={`
           w-full px-6
-          bg-primary hover:bg-primary-hover
-          text-white text-base font-semibold
+          bg-blue-700 hover:bg-primary-hover
+          text-black text-base font-semibold
           rounded-custom transition-all duration-200
           flex items-center justify-center
           disabled:opacity-70 disabled:cursor-not-allowed
