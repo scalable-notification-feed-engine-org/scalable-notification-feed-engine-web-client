@@ -27,13 +27,12 @@ export const CreatePostBox = ({ onPostCreated }: CreatePostBoxProps) => {
 
             const postData: Partial<Post> = {
                 content: content.trim(),
-                userId: user.id,
+                author: user,
                 tenantId: "default-tenant",
-                createdAt: new Date().toISOString(),
+                createAt: new Date().toISOString(),
                 mediaUrls: [],
                 likeCount: 0,
                 commentCount: 0,
-                isLiked: false,
                 comments: []
             };
 
