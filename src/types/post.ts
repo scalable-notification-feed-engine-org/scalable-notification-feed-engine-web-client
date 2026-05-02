@@ -1,8 +1,8 @@
 export interface User {
     id: string;
-    firstName: string;
+    firstName?: string;
     email?: string;
-    avatarUrl: string;
+    avatarUrl?: string;
 }
 
 export interface PostComment {
@@ -14,7 +14,8 @@ export interface PostComment {
 export interface Post {
     id: string;
     content: string;
-    mediaUrls: string[];
+    tenantId: string;
+    mediaUrls?: string[];
     createAt: string | Date;
     likeCount: number;
     commentCount: number;
