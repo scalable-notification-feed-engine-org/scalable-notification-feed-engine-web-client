@@ -4,6 +4,11 @@ import GroupSwitcher from "@/components/ui/GroupSwitcher";
 import React, {useState} from "react";
 import apiClient from "@/lib/api-client";
 import Cookies from "js-cookie";
+import axios from "axios";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import {jwtDecode} from "jwt-decode";
+
 
 
 export default function GroupCreatePage() {
@@ -16,12 +21,13 @@ export default function GroupCreatePage() {
     const [errors, setErrors] = useState({name: "", slug: ""});
     const [loading, setLoading] = useState(false);
 
+
     const handleGroupCreate = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setApiError("");
-        const teoken = Cookies.get("access_token");
+        const token = Cookies.get("auth_token");
 
-        if (!teoken) {
+        if (!token) {
             console.log(" Fetch skipped: Token is null");
            return;
         }
@@ -44,19 +50,36 @@ export default function GroupCreatePage() {
 
         if(isNameValid && isSlugValid){
             try {
+                const jwtPayload = jwtDecode(token);
+                const userId =  jwtPayload.sub;
+                const data = {
+                    name: formData.name,
+                    slug: formData.slug,
+                    description: formData.description,
+                    ownerId:userId
+                }
                 setLoading(true);
-                const response = await apiClient.post({
-                    baseURL: "http://localhost:8085/api/v1/tenants/groups",
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    data: formData
+                const response = await apiClient.post(`/tenants/groups`, data);
+
+                setFormData({
+                    name: "",
+                    slug: "",
+                    description: "",
                 });
 
-             console.log(response);
+                if(response.status === 201){
+                    alert("Group created successfully.")
+                }
+
 
             }catch(e){
-                // error handling
+                if(axios.isAxiosError(e)) {
+                    const msg = e.response?.data.message || "Group create failed try again.";
+                    setApiError(msg);
+                }else {
+                    console.error("Not an axios error",e);
+                }
+                setLoading(false);
             }
         }
 
@@ -65,9 +88,16 @@ export default function GroupCreatePage() {
     return (
         <>
                    <main className="min-h-screen bg-slate-50">
-        <div className="bg-white border-b p-4 mb-8">
+        <div className="bg-white p-4 mb-8">
             <GroupSwitcher />
         </div>
+                       {
+                           apiError && (
+                               <div className="bg-red-100 text-red-700 p-3 mb-4 text-sm rounded-lg">
+                                   {apiError}
+                               </div>
+                           )
+                       }
 
         <div className="flex justify-center px-4">
             <div className="w-full max-w-xl bg-white">
@@ -76,37 +106,54 @@ export default function GroupCreatePage() {
                     <p className="text-slate-500 text-sm">Organize your projects by creating a new group.</p>
                 </header>
 
-                <form className="flex flex-col gap-y-6">
+                <form className="flex flex-col gap-y-6" onSubmit={handleGroupCreate}>
                     <div className="flex flex-col sm:flex-row sm:items-center">
-                        <label htmlFor="name" className="w-full sm:w-32 font-semibold text-slate-700 mb-1 sm:mb-0">
-                            Group Name
-                        </label>
-                        <input
+                        <Input
+                            label="Group Name"
                             id="name"
                             type="text"
-                            className="flex-1  border border-slate-300 p-2 outline-none rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900"
-                            placeholder="e.g. Engineering Team"
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            value={formData.name}
+                            onChange={(e) => {
+                                setFormData({
+                                    ...formData,
+                                    name: e.target.value
+                                })
+
+                                if (errors.name) {
+                                      setErrors({...errors, name: " "})
+                                }
+                            }
+                            }
+                            error={errors.name}
+
+
                         />
                     </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-center">
-                        <label htmlFor="slug" className="w-full sm:w-32 font-semibold text-slate-700 mb-1 sm:mb-0">
-                            Slug
-                        </label>
-                        <input
-                            id="slug"
+                        <Input
+                            label="Group Slug"
+                            id="name"
                             type="text"
-                            className="flex-1 border border-slate-300 p-2 outline-none rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 bg-slate-50"
-                            placeholder="engineering-team"
-                            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                            value={formData.slug}
+                            onChange={(e) => {
+                                setFormData({
+                                    ...formData,
+                                    slug: e.target.value
+                                })
+
+                                if (errors.slug) {
+                                    setErrors({...errors, name: " "})
+                                }
+                            }
+                            }
+                            error={errors.slug}
+
+
                         />
                     </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-start">
-                        <label htmlFor="description" className="w-full sm:w-32 font-semibold text-slate-700 mt-2 mb-1 sm:mb-0">
-                            Description
-                        </label>
                         <textarea
                             id="description"
                             className="flex-1 border border-slate-300 p-2 h-32 outline-none rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 resize-none"
@@ -116,9 +163,7 @@ export default function GroupCreatePage() {
                     </div>
 
                     <div className="flex justify-end mt-4">
-                        <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow-md shadow-blue-200 transition">
-                            Create Group
-                        </button>
+                        <Button label="Create group" type="submit" isLoading={loading} className="h-13" />
                     </div>
                 </form>
             </div>
