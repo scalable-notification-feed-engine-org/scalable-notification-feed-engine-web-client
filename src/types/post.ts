@@ -16,7 +16,7 @@ export interface Post {
     content: string;
     tenantId: string;
     mediaUrls?: string[];
-    createAt: string | Date;
+    createdAt: string | Date;
     likeCount: number;
     commentCount: number;
     author: User;
