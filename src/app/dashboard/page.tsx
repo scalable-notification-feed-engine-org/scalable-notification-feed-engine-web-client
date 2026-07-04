@@ -27,7 +27,7 @@ export default function Dashboard() {
     const { activeTenant } = useTenantStore(); 
     const { status } = useNotifications();
     const { token, user } = useAuth();
-    
+
     const {data} = useQuery<GetFeedData>(GET_FEED, {
         fetchPolicy: 'network-only',
         context: {
@@ -37,7 +37,6 @@ export default function Dashboard() {
         },
         skip: !activeTenant 
     });
-
     useEffect(() => {
         const fetchData = async () => {
             const tokenValue = typeof token === 'function' ? token() : token;
@@ -54,7 +53,6 @@ export default function Dashboard() {
                 });
                 const userData = await userRes.json();
                 setUsers(Array.isArray(userData.data) ? userData.data : []);
-                console.log("Current Tenant Data: ", data);
 
             } catch (err) {
                 console.error("Dashboard data fetch error:", err);
