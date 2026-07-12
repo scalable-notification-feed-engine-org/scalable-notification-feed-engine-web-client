@@ -1,23 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono, IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import {NotificationProvider} from "@/context/NotificationContext";
-import {SocketProvider} from "@/context/common/SocketContext";
+import { NotificationProvider } from "@/context/NotificationContext";
+import { SocketProvider } from "@/context/common/SocketContext";
 import React from "react";
 import ToastProvider from "@/context/ToastContext";
-import {ApolloWrapper} from "@/context/ApolloWrapper";
-import {Navbar} from "@/components/ui/Navbar";
+import { ApolloWrapper } from "@/context/ApolloWrapper";
+import { Navbar } from "@/components/ui/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-display" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["500"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -25,29 +27,27 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
-}: Readonly<{
+                                     children,
+                                   }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+      <html
+          lang="en"
+          className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
+      >
       <body className="min-h-full flex flex-col">
       <AuthProvider>
         <ApolloWrapper>
-        <SocketProvider>
-        <NotificationProvider>
-          <ToastProvider/>
-          <Navbar/>
-          <main>{children}</main>
-        </NotificationProvider>
-        </SocketProvider>
-          </ApolloWrapper>
+          <SocketProvider>
+            <NotificationProvider>
+              <ToastProvider />
+              <main>{children}</main>
+            </NotificationProvider>
+          </SocketProvider>
+        </ApolloWrapper>
       </AuthProvider>
-
       </body>
-    </html>
+      </html>
   );
 }
