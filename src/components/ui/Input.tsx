@@ -1,53 +1,61 @@
 'use client'
 
-import React, {useState} from "react";
-import { Eye, EyeOff } from "lucide-react"
+import React, { useId, useState } from "react";
 
 interface InputProps {
     label: string;
-    type?: "text" | "email" | "password";
     value: string;
+    type?: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     id: string;
     error?: string;
-    className?: string;
 }
 
-export default function Input({label, type="text", value, onChange, id, error, className=''}:InputProps) {
+export default function Input({ label, value, type = "text", onChange, id, error }: InputProps) {
     const [showPassword, setShowPassword] = useState(false);
-    const isPassword = type === 'password';
+    const errorId = useId();
+    const isPassword = type === "password";
+    const resolvedType = isPassword && showPassword ? "text" : type;
 
     return (
-        <div className="relative w-full mb-6">
-            <input
-             id={id}
-             type={isPassword && showPassword ? "text" : type}
-             value={value}
-             onChange={onChange}
-             placeholder=" "
-             className="peer w-full px-4 py-3 text-base border-2 border-gray-200 rounded-custom outline-none focus:border-primary bg-transparent"
-            />
-            <label
-             htmlFor={id}
-             className={`absolute left-4 top-3 text-gray-400 text-base transition-all pointer-events-none
-             peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-sm peer-focus:text-primary peer-focus:bg-white peer-focus:px-1
-             peer-focus:[:not(placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:text-primary peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1
-            ${className}`}
-            >
+        <div className="mb-5">
+            <label htmlFor={id} className="block text-sm font-medium text-ink dark:text-paper mb-1.5">
                 {label}
             </label>
-
-            {isPassword && (
-                <button
-                 type="button"
-                 onClick={() => setShowPassword(!showPassword)}
-                 className="absolute right-4 top-3.5 text-gray-400 hover:text-primary transition-colors"
-                >
-                    {showPassword ? <Eye size={20}/> : <EyeOff size={20}/>}
-                </button>
+            <div className="relative">
+                <input
+                    id={id}
+                    type={resolvedType}
+                    value={value}
+                    onChange={onChange}
+                    aria-invalid={!!error}
+                    aria-describedby={error ? errorId : undefined}
+                    className={`
+            w-full h-12 px-4 ${isPassword ? "pr-11" : ""}
+            bg-white dark:bg-[#1E1A2E]
+            border rounded-xl text-sm text-ink dark:text-paper
+            placeholder:text-fog
+            transition-colors duration-150
+            focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+            ${error ? "border-ember" : "border-line dark:border-line-dark"}
+          `}
+                />
+                {isPassword && (
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword((s) => !s)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-fog hover:text-ink dark:hover:text-paper text-xs font-medium"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                        {showPassword ? "Hide" : "Show"}
+                    </button>
+                )}
+            </div>
+            {error && (
+                <p id={errorId} role="alert" className="mt-1.5 text-xs text-ember">
+                    {error}
+                </p>
             )}
-            {error && <span className="text-red-500 text-xs mt-1">{error}</span>}
         </div>
     );
-
 }
