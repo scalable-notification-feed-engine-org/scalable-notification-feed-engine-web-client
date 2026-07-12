@@ -1,50 +1,35 @@
 @import "tailwindcss";
 
-:root {
+@theme {
+  --font-display: "Fraunces", serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
 
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --color-ink: #151221;
+  --color-paper: #FAF8F5;
+  --color-primary: #7C5CFC;
+  --color-primary-hover: #6A4AE8;
+  --color-primary-active: #5D3FD9;
+  --color-ember: #FF6B4A;
+  --color-ember-bg: #FAECE7;
+  --color-ember-text: #993C1D;
+  --color-fog: #8B8797;
+  --color-line: #E7E3DD;
+  --color-line-dark: #2E2841;
 
-  --card: #ffffff;
-  --border: #e2e8f0; /* Slate 200 */
-
-  /* Brand Colors */
-  --primary: #4f46e5; /* Indigo 600 - Professional standard */
-  --primary-hover: #4338ca;
-
-  /* Text Styles */
-  --text-muted: #64748b; /* Slate 500 */
+  --radius-custom: 0.75rem;
 }
 
-@theme inline {
-  /* Color Mapping */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-border-subtle: var(--border);
-
-  --color-brand: var(--primary);
-  --color-brand-hover: var(--primary-hover);
-  --color-muted: var(--text-muted);
-
-  /* Elevation & Shape */
-  --radius-saas: 0.75rem; /* 12px - Modern standard */
-  --shadow-saas: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+@keyframes voxa-wave {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.55; }
+  50% { transform: scaleY(1); opacity: 1; }
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617; /* Slate 950 */
-    --foreground: #f8fafc;
-    --card: #0f172a;
-    --border: #1e293b;
-    --text-muted: #94a3b8;
-  }
+.animate-voxa-wave {
+  transform-origin: bottom;
+  animation-name: voxa-wave;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', system-ui, sans-serif; /* SaaS standard typography */
-  -webkit-font-smoothing: antialiased;
+@media (prefers-reduced-motion: reduce) {
+  .animate-voxa-wave { animation: none; transform: scaleY(0.75); }
 }
