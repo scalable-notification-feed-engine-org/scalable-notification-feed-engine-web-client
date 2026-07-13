@@ -45,7 +45,7 @@ export const PostCard = ({ post, onLikeToggle, onCommentAdded }: PostCardProps) 
     return (
         <div className="bg-card border border-border-subtle rounded-saas shadow-saas p-5 mb-6 transition-all hover:border-brand/30">
             <div className="flex gap-4">
-                <div className="h-10 w-10 rounded-full bg-brand/10 border border-brand/20 flex-shrink-0 flex items-center justify-center font-bold text-brand">
+                <div className="h-10 w-10 rounded-full bg-brand/10 border border-brand/20 shrink-0 flex items-center justify-center font-bold text-brand">
                     {post.author?.avatarUrl ? (
                         <Image src={post.author.avatarUrl} alt={post.author.firstName} className="w-full h-full object-cover" width="100" height="100"/>
                     ) : (
@@ -56,15 +56,14 @@ export const PostCard = ({ post, onLikeToggle, onCommentAdded }: PostCardProps) 
                 </div>
 
                 <div className="flex-1">
-                    {/* Header */}
                     <div className="flex justify-between items-start mb-2">
                         <div>
                             <h4 className="font-semibold text-sm text-foreground">
                                 {post.author?.firstName || `User ${post.author.id.split('-')[0]}`}
                             </h4>
                             <span className="text-muted text-[11px] font-medium tracking-tight">
-    {post.createAt && !isNaN(new Date(post.createAt).getTime())
-        ? `${formatDistanceToNow(new Date(post.createAt))} ago`
+    {post.createdAt && !isNaN(new Date(post.createdAt).getTime())
+        ? `${formatDistanceToNow(new Date(post.createdAt))} ago`
         : "Just now"}
 </span>
                         </div>
@@ -80,15 +79,15 @@ export const PostCard = ({ post, onLikeToggle, onCommentAdded }: PostCardProps) 
 
 
                     <div className="flex gap-4 border-t border-border-subtle pt-4 mt-2">
-                        {/*<button*/}
-                        {/*    onClick={() => onLikeToggle(post.id)}*/}
-                        {/*    className={`flex items-center gap-2 transition-all text-xs font-semibold group/btn active:scale-95 ${post.isLiked ? 'text-red-500' : 'text-muted hover:text-brand'}`}*/}
-                        {/*>*/}
-                        {/*    /!*<div className={`p-1.5 rounded-md ${post.isLiked ? 'bg-red-50' : 'group-hover/btn:bg-brand/10'}`}>*!/*/}
-                        {/*    /!*    <Heart size={16} fill={post.isLiked ? "currentColor" : "none"} />*!/*/}
-                        {/*    /!*</div>*!/*/}
-                        {/*    <span>{post.likeCount ?? 0} Likes</span>*/}
-                        {/*</button>*/}
+                        <button
+                            onClick={() => onLikeToggle(post.id)}
+                            className={`flex items-center gap-2 transition-all text-xs font-semibold group/btn active:scale-95 ${post.isLiked ? 'text-red-500' : 'text-muted hover:text-brand'}`}
+                        >
+                            <div className={`p-1.5 rounded-md ${post.isLiked ? 'bg-red-50' : 'group-hover/btn:bg-brand/10'}`}>
+                                <Heart size={16} fill={post.isLiked ? "currentColor" : "none"} />
+                            </div>
+                            <span>{post.likeCount ?? 0} Likes</span>
+                        </button>
 
                         <button
                             onClick={() => setShowCommentInput(!showCommentInput)}
@@ -135,7 +134,7 @@ export const PostCard = ({ post, onLikeToggle, onCommentAdded }: PostCardProps) 
                                     post.comments.map((comment) => (
                                         <div key={comment.id} className="flex gap-3 group">
 
-                                            <div className="h-7 w-7 rounded-full bg-panel border border-border-subtle flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-muted">
+                                            <div className="h-7 w-7 rounded-full bg-panel border border-border-subtle shrink-0 flex items-center justify-center text-[10px] font-bold text-muted">
                                                 {comment.userId.substring(0, 2).toUpperCase()}
                                             </div>
 
