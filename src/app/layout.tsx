@@ -7,7 +7,7 @@ import { SocketProvider } from "@/context/common/SocketContext";
 import React from "react";
 import ToastProvider from "@/context/ToastContext";
 import { ApolloWrapper } from "@/context/ApolloWrapper";
-import { Navbar } from "@/components/ui/Navbar";
+import TopHeader from "@/components/ui/TopHeader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +42,7 @@ export default function RootLayout({
           <SocketProvider>
             <NotificationProvider>
               <ToastProvider />
+               <TopHeader/>
               <main>{children}</main>
             </NotificationProvider>
           </SocketProvider>
