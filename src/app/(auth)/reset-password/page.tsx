@@ -1,9 +1,11 @@
 'use client'
 import React, { useState } from "react";
 import { useSearchParams, useRouter } from 'next/navigation';
+import OTPInput from "@/components/ui/OTPInput";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import apiClient from "@/lib/api-client";
+import AuthLayout from "@/app/(auth)/AuthLayout";
 
 export default function ResetPasswordPage() {
     const searchParams = useSearchParams();
@@ -12,7 +14,7 @@ export default function ResetPasswordPage() {
 
     const [formData, setFormData] = useState({ otp: "", newPassword: "", confirmPassword: "" });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState({otp: "", newPassword: "", confirmPassword: ""});
+    const [error, setError] = useState({ otp: "", newPassword: "", confirmPassword: "" });
     const [message, setMessage] = useState("");
     const [apiError, setApiError] = useState("");
 
@@ -20,22 +22,22 @@ export default function ResetPasswordPage() {
         e.preventDefault();
         setApiError("");
         let isValid = true;
-        const newErrors = {otp: "", newPassword: "", confirmPassword: "" };
+        const newErrors = { otp: "", newPassword: "", confirmPassword: "" };
 
-        if(!formData.otp){
+        if (!formData.otp) {
             newErrors.otp = "OTP is required";
             isValid = false;
-        }else if(isNaN((Number(formData.otp)))){
+        } else if (isNaN((Number(formData.otp)))) {
             newErrors.otp = "OTP must be a number";
             isValid = false
         }
 
-        if(!formData.newPassword){
+        if (!formData.newPassword) {
             newErrors.newPassword = "New password is required";
             isValid = false;
         }
 
-        if(!formData.confirmPassword){
+        if (!formData.confirmPassword) {
             newErrors.confirmPassword = "Confirm password is required";
             isValid = false;
         }
@@ -47,8 +49,7 @@ export default function ResetPasswordPage() {
 
         setError(newErrors)
 
-        if(isValid) {
-
+        if (isValid) {
             try {
                 setLoading(true);
                 await apiClient.post(`/users/visitors/reset-password`, {
@@ -57,10 +58,10 @@ export default function ResetPasswordPage() {
                     newPassword: formData.newPassword
                 });
 
-                    alert("Password reset successful! Please login.");
-                    await router.push("/login");
+                alert("Password reset successful! Please login.");
+                router.push("/login");
 
-            } catch (err) {
+            } catch (err:any) {
                 setApiError(err.response?.data?.message || "Invalid OTP or request expired.");
             } finally {
                 setLoading(false);
@@ -69,82 +70,59 @@ export default function ResetPasswordPage() {
     };
 
     return (
-        <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded-xl text-center">
-            <h1 className="text-2xl font-bold mb-4">Verify Your Email</h1>
-            <p className="text-gray-600 mb-6">
-                Enter your email address and we&#39;ll send you a link to reset your password.
-            </p>
+        <AuthLayout
+            eyebrow="Reset password"
+            title="Reset your password"
+            description="Enter the code we sent you and choose a new password."
+        >
             {apiError && (
-                <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+                <div role="alert" className="p-3 mb-5 text-sm text-ember-text bg-ember-bg rounded-xl">
                     {apiError}
                 </div>
             )}
 
             {message ? (
-                <div className="p-4 mb-4 text-sm text-red-700 bg-green-100 rounded-lg">
+                <div role="alert" className="p-4 mb-4 text-sm text-[#712B13] bg-ember-bg rounded-xl">
                     {message}
                 </div>
-            ):
+            ) : (
+                <form onSubmit={handleReset}>
+                    <OTPInput
+                        label="OTP code"
+                        value={formData.otp}
+                        onChange={(e) => {
+                            setFormData({ ...formData, otp: e.target.value });
+                            if (error.otp) setError({ ...error, otp: "" })
+                        }}
+                        id="otp"
+                        error={error.otp}
+                    />
+                    <Input
+                        label="New password"
+                        type="password"
+                        value={formData.newPassword}
+                        onChange={(e) => {
+                            setFormData({ ...formData, newPassword: e.target.value });
+                            if (error.newPassword) setError({ ...error, newPassword: "" })
+                        }}
+                        id="new-password"
+                        error={error.newPassword}
+                    />
+                    <Input
+                        label="Confirm password"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(e) => {
+                            setFormData({ ...formData, confirmPassword: e.target.value });
+                            if (error.confirmPassword) setError({ ...error, confirmPassword: "" })
+                        }}
+                        id="confirm-password"
+                        error={error.confirmPassword}
+                    />
 
-            <form onSubmit={handleReset} className="space-y-4">
-                <Input
-                    label="OTP Code"
-                    value={formData.otp}
-                    onChange={(e) => {
-                        setFormData({
-                            ...formData,
-                            otp: e.target.value,
-                        });
-
-                        if(error.otp) {
-                            setError({...error, otp: ""})
-                        }
-
-                    }}
-                    id="otp"
-                    error={error.otp}
-
-                />
-                <Input
-                    label="New Password"
-                    type="password"
-                    value={formData.newPassword}
-                    onChange={(e) => {
-                        setFormData({
-                            ...formData,
-                            newPassword: e.target.value,
-                        });
-
-                        if(error.newPassword) {
-                            setError({...error, newPassword: ""})
-                        }
-
-                    }}
-                    id="new-password"
-                    error={error.newPassword}
-                />
-                <Input
-                    label="Confirm Password"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={(e) => {
-                        setFormData({
-                            ...formData,
-                            confirmPassword: e.target.value,
-                        });
-
-                        if(error.confirmPassword) {
-                            setError({...error, confirmPassword: ""})
-                        }
-
-                    }}
-                    id="confirm-password"
-                    error={error.confirmPassword}
-                />
-
-                <Button label="Reset Password" isLoading={loading} type="submit" className="h-13" />
-            </form>
-            }
-        </div>
+                    <Button label="Reset password" isLoading={loading} type="submit" />
+                </form>
+            )}
+        </AuthLayout>
     );
 }
