@@ -37,8 +37,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (token && savedUser) {
                 try {
                     const parserUser = JSON.parse(savedUser);
-
-                    // eslint-disable-next-line react-hooks/set-state-in-effect
                     setUser(parserUser);
                 }catch (error) {
                     console.error("Auth data corrupted:", error);
