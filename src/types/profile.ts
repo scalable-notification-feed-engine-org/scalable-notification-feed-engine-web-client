@@ -34,6 +34,6 @@ export interface ProfileData extends AboutDetails{
     category?: string;
     location?: string;
     isOwnProfile: boolean;
-    about: AboutDetails;
+    about?: AboutDetails;
     suggestedPeople?: SuggestedPerson[];
 }
