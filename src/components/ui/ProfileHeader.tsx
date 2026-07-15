@@ -1,101 +1,112 @@
 'use client';
-import Image from "next/image";
-import { Camera, Plus, Pencil, UserPlus, BadgeCheck } from "lucide-react";
+
+import React, { useState, useRef } from "react";
 import { ProfileData } from "@/types/profile";
-import Button from "@/components/ui/Button";
-import { AvatarFallback, CoverFallback } from "@/components/ui/AvatarPlaceholder";
+import { Loader2, Camera } from "lucide-react";
+import { useProfileUpload } from "@/hooks/user-profile-upload";
+import Image from "next/image";
 
 interface ProfileHeaderProps {
-    profile: ProfileData;
+    profile: ProfileData | null;
+    accessToken: string;
+    onProfileUpdate: (updatedData: Partial<ProfileData>) => Promise<void>;
 }
 
-export default function ProfileHeader({ profile }: ProfileHeaderProps) {
-    const { name, aliasName, isVerified, coverImageUrl, avatarImageUrl, isOwnProfile } = profile;
+export default function ProfileHeader({ profile, accessToken, onProfileUpdate }: ProfileHeaderProps) {
+    const {
+        name = "New User",
+        aliasName = "",
+        isVerified = false,
+        coverImageUrl,
+        avatarImageUrl,
+        isOwnProfile = true
+    } = profile || {};
+
+    const { uploadProfileImage, isUploading } = useProfileUpload(accessToken);
+    const [activeUploadType, setActiveUploadType] = useState<'avatar' | 'cover' | null>(null);
+
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+    const coverInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+
+        const localPreviewUrl = URL.createObjectURL(file);
+        setActiveUploadType(type);
+
+        await onProfileUpdate({ [`${type}ImageUrl`]: localPreviewUrl });
+
+        try {
+            const uploadedKey = await uploadProfileImage(file, type);
+
+            if (uploadedKey) {
+                await onProfileUpdate({ [`${type}ImageKey`]: uploadedKey });
+            } else {
+                alert(`Could not save image to cloud storage.`);
+            }
+        } catch (err) {
+            console.error(`${type} upload lifecycle failed:`, err);
+        } finally {
+            setActiveUploadType(null);
+        }
+    };
 
     return (
-        <div className="w-full">
-            <div className="max-w-5xl mx-auto">
-                <div className="relative w-full h-40 sm:h-56 md:h-72 overflow-hidden sm:rounded-b-saas">
-                    {coverImageUrl ? (
-                        <Image
-                            src={coverImageUrl}
-                            alt={`${name}'s cover photo`}
-                            fill
-                            priority
-                            sizes="(max-width: 1024px) 100vw, 1024px"
-                            className="object-cover"
-                        />
-                    ) : (
-                        <CoverFallback />
-                    )}
+        <div className="relative w-full bg-background border-b">
+            <div className="relative h-60 w-full bg-muted flex items-center justify-center overflow-hidden">
+                {coverImageUrl ? (
+                    <Image src={coverImageUrl} alt="Cover" className="w-full h-full object-cover" />
+                ) : (
+                    <div className="text-muted-foreground text-sm">No cover image added</div>
+                )}
+                {isOwnProfile && (
+                    <button
+                        onClick={() => coverInputRef.current?.click()}
+                        className="absolute bottom-4 right-4 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-md flex items-center gap-2 text-xs font-medium backdrop-blur-sm transition z-10"
+                    >
+                        <Camera className="w-4 h-4" /> Change Cover
+                    </button>
+                )}
+                <input type="file" ref={coverInputRef} onChange={(e) => handleFileChange(e, 'cover')} className="hidden" accept="image/*" />
 
-                    {isOwnProfile && (
-                        <button className="absolute bottom-3 right-3 flex items-center gap-2 h-9 px-3 rounded-md bg-white/95 hover:bg-white text-sm font-semibold text-foreground shadow-saas transition-colors">
-                            <Camera size={16} aria-hidden="true" />
-                            {coverImageUrl ? "Edit cover photo" : "Add cover photo"}
-                        </button>
-                    )}
-                </div>
+                {isUploading && activeUploadType === 'cover' && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
+                        <Loader2 className="w-8 h-8 animate-spin text-white" />
+                    </div>
+                )}
             </div>
 
-            <div className="max-w-5xl mx-auto px-4">
-                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-12 sm:-mt-14">
-                    <div className="flex items-end gap-4">
-                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full ring-4 ring-white border-2 border-brand overflow-hidden shrink-0">
-                            {avatarImageUrl ? (
-                                <Image
-                                    src={avatarImageUrl}
-                                    alt={`${name}'s profile picture`}
-                                    fill
-                                    sizes="128px"
-                                    className="object-cover"
-                                />
-                            ) : (
-                                <AvatarFallback className="w-full h-full" />
-                            )}
-                        </div>
-                    </div>
+            <div className="max-w-5xl mx-auto px-4 pb-6 relative flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16">
+                <div className="relative w-32 h-32 rounded-full border-4 border-background bg-muted flex items-center justify-center overflow-hidden shadow-lg group">
+                    {avatarImageUrl ? (
+                        <Image src={avatarImageUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="text-xl font-bold uppercase text-muted-foreground">{name?.substring(0, 2)}</div>
+                    )}
+                    {isOwnProfile && (
+                        <button
+                            onClick={() => avatarInputRef.current?.click()}
+                            className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200 z-10"
+                        >
+                            <Camera className="w-5 h-5" />
+                        </button>
+                    )}
+                    <input type="file" ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} className="hidden" accept="image/*" />
 
-                    <div className="flex items-center gap-2 sm:pb-1">
-                        {isOwnProfile ? (
-                            <>
-                                <Button
-                                    label="Add to story"
-                                    icon={<Plus size={16} aria-hidden="true" />}
-                                    variant="primary"
-                                    fullWidth={false}
-                                    className="h-9 px-4 text-sm"
-                                />
-                                <Button
-                                    label="Edit profile"
-                                    icon={<Pencil size={16} aria-hidden="true" />}
-                                    variant="secondary"
-                                    fullWidth={false}
-                                    className="h-9 px-4 text-sm"
-                                />
-                            </>
-                        ) : (
-                            <Button
-                                label="Follow"
-                                icon={<UserPlus size={16} aria-hidden="true" />}
-                                variant="primary"
-                                fullWidth={false}
-                                className="h-9 px-4 text-sm"
-                            />
-                        )}
-                    </div>
+                    {isUploading && activeUploadType === 'avatar' && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
+                            <Loader2 className="w-6 h-6 animate-spin text-white" />
+                        </div>
+                    )}
                 </div>
 
-                <div className="mt-3 sm:mt-2 pb-6">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                        <h1 className="text-xl sm:text-2xl font-bold text-foreground" style={{ fontFamily: "var(--font-display)" }}>
-                            {name}
-                        </h1>
-                        {isVerified && (
-                            <BadgeCheck size={20} className="text-brand fill-brand/20" aria-label="Verified account" />
-                        )}
-                        {aliasName && <span className="text-lg sm:text-xl font-medium text-muted">({aliasName})</span>}
-                    </div>
+                <div className="text-center sm:text-left mb-2 flex-1">
+                    <h1 className="text-2xl font-bold flex items-center justify-center sm:justify-start gap-2">
+                        {name} {isVerified && <span className="text-blue-500 text-sm">✓</span>}
+                    </h1>
+                    {aliasName && <p className="text-sm text-muted-foreground">@{aliasName}</p>}
                 </div>
             </div>
         </div>
