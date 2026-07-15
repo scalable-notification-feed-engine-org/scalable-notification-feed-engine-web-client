@@ -12,20 +12,24 @@ const NAV_ITEMS = [
 ];
 
 interface AboutSectionProps {
-    profile: ProfileData;
+    profile: ProfileData | null;
 }
 
 export default function AboutSection({ profile }: AboutSectionProps) {
     const [active, setActive] = useState("Intro");
-    const { about, isOwnProfile } = profile;
+    const isOwnProfile = profile?.isOwnProfile ?? true;
+    const about = profile?.about || {
+        bioLines: "Welcome to your profile!",
+        pinnedDetails: []
+    };
 
     return (
-        <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col md:flex-row ">
-            <nav aria-label="About sections" className="w-full md:w-56 shrink-0 bg-white border-r border-gray-200 rounded-saas p-3 h-fit">
+        <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-4">
+            <nav aria-label="About sections" className="w-full md:w-56 shrink-0 bg-white border border-gray-200 rounded-saas p-3 h-fit">
                 <h2 className="text-lg font-bold text-foreground px-2 mb-2" style={{ fontFamily: "var(--font-display)" }}>
                     About
                 </h2>
-                <ul className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible">
+                <ul className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible no-scrollbar">
                     {NAV_ITEMS.map((item) => (
                         <li key={item} className="shrink-0">
                             <button
@@ -44,28 +48,32 @@ export default function AboutSection({ profile }: AboutSectionProps) {
 
             <div className="flex-1 min-w-0">
                 {active === "Intro" && (
-                    <div className="bg-white border border-border-subtle rounded-saas p-5">
-                        <h2 className="text-base font-semibold text-foreground mb-3">Bio</h2>
-                        <AboutRow icon={Info} label="About you" value={about.bio} isOwnProfile={isOwnProfile} />
+                    <div className="bg-white border border-border-subtle rounded-saas p-5 space-y-5">
+                        <div>
+                            <h2 className="text-base font-semibold text-foreground mb-3">Bio</h2>
+                            <AboutRow icon={Info} label="About you" value={about?.bioLines || ""} isOwnProfile={isOwnProfile} />
+                        </div>
 
-                        <h2 className="text-base font-semibold text-foreground mt-5 mb-3">Pinned details</h2>
-                        {about.pinnedDetails && about.pinnedDetails.length > 0 ? (
-                            <ul className="space-y-2">
-                                {about.pinnedDetails.map((d, i) => (
-                                    <li key={i} className="flex items-center gap-3">
-                                        <Pin size={18} className="text-muted" aria-hidden="true" />
-                                        <span className="text-sm text-foreground">{d}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <AboutRow icon={Pin} label="Pinned details" isOwnProfile={isOwnProfile} />
-                        )}
+                        <div>
+                            <h2 className="text-base font-semibold text-foreground mb-3">Pinned details</h2>
+                            {about?.pinnedDetails && about.pinnedDetails.length > 0 ? (
+                                <ul className="space-y-2">
+                                    {about.pinnedDetails.map((d, i) => (
+                                        <li key={i} className="flex items-center gap-3">
+                                            <Pin size={18} className="text-muted" aria-hidden="true" />
+                                            <span className="text-sm text-foreground">{d}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <AboutRow icon={Pin} label="Pinned details" isOwnProfile={isOwnProfile} />
+                            )}
+                        </div>
                     </div>
                 )}
 
                 {active === "Personal details" && (
-                    <PersonalDetails about={about} key={profile.id} />
+                    <PersonalDetails about={about} key={profile?.id || "default-id"} />
                 )}
 
                 {!["Intro", "Personal details"].includes(active) && (
