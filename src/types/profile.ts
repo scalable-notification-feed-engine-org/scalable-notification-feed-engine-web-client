@@ -1,5 +1,5 @@
 export interface AboutDetails {
-    bio?: string;
+    bioLines?: [string];
     pinnedDetails?: string[];
     currentCity?: string;
     homeTown?: string;
@@ -19,13 +19,16 @@ export interface SuggestedPerson {
     avatarUrl?: string;
 }
 
-export interface ProfileData {
+export interface ProfileData extends AboutDetails{
     id: string;
     name: string;
     aliasName?: string;
     isVerified?: boolean;
-    coverImageUrl?: string;
     avatarImageUrl?: string;
+    coverImageUrl?: string;
+    avatarImageKey?: string | null;
+    coverImageKey?: string | null;
+
     followersCount: number;
     followingCount: number;
     category?: string;
