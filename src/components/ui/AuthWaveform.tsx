@@ -8,7 +8,7 @@ export default function AuthWaveform() {
             {heights.map((h, i) => (
                 <span
                     key={i}
-                    className="w-0.75 rounded-full bg-[#7C5CFC]/70 animate-voxa-wave"
+                    className="w-0.75 rounded-full bg-primary/70 animate-voxa-wave"
                     style={{
                         height: `${h}%`,
                         animationDelay: `${i * 90}ms`,
