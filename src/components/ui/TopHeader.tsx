@@ -42,7 +42,7 @@ export default function TopHeader() {
                     <Link href="/dashboard" className="text-lg font-semibold text-brand" style={{ fontFamily: "var(--font-display)" }}>
                         Voxa
                     </Link>
-                    <div className="hidden sm:block w-56">
+                    <div className="hidden sm:block w-56 border border-gray-400 rounded-full">
                         <SearchInput
                             placeholder="Search Voxa"
                             value={query}
