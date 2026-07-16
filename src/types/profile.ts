@@ -28,12 +28,12 @@ export interface ProfileData extends AboutDetails{
     coverImageUrl?: string;
     avatarImageKey?: string | null;
     coverImageKey?: string | null;
-
+    currentUserId: string | undefined;
     followersCount: number;
     followingCount: number;
     category?: string;
     location?: string;
-    isOwnProfile: boolean;
+    ownProfile: boolean;
     about?: AboutDetails;
     suggestedPeople?: SuggestedPerson[];
 }
