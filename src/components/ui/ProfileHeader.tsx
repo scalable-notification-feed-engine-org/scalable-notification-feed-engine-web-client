@@ -2,9 +2,11 @@
 
 import React, { useState, useRef } from "react";
 import { ProfileData } from "@/types/profile";
-import { Loader2, Camera } from "lucide-react";
+import { Loader2, MessageCircle, UserPlus, Search, Pencil, Plus, ImagePlus } from "lucide-react";
 import { useProfileUpload } from "@/hooks/user-profile-upload";
 import Image from "next/image";
+import Button from "@/components/ui/Button";
+import {useAuth} from "@/context/AuthContext";
 
 interface ProfileHeaderProps {
     profile: ProfileData | null;
@@ -14,24 +16,30 @@ interface ProfileHeaderProps {
 
 export default function ProfileHeader({ profile, accessToken, onProfileUpdate }: ProfileHeaderProps) {
     const {
-        name = "New User",
         aliasName = "",
         isVerified = false,
         coverImageUrl,
         avatarImageUrl,
-        isOwnProfile = true
+        ownProfile = true
     } = profile || {};
+
 
     const { uploadProfileImage, isUploading } = useProfileUpload(accessToken);
     const [activeUploadType, setActiveUploadType] = useState<'avatar' | 'cover' | null>(null);
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const coverInputRef = useRef<HTMLInputElement>(null);
+    const {user} = useAuth();
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        if (user?.id != profile?.currentUserId){
+            if (profile) {
+                profile.ownProfile = false;
+            }
+        }
 
         const localPreviewUrl = URL.createObjectURL(file);
         setActiveUploadType(type);
@@ -39,7 +47,7 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
         await onProfileUpdate({ [`${type}ImageUrl`]: localPreviewUrl });
 
         try {
-            const uploadedKey = await uploadProfileImage(file, type);
+            const uploadedKey = await uploadProfileImage(file, type)
 
             if (uploadedKey) {
                 await onProfileUpdate({ [`${type}ImageKey`]: uploadedKey });
@@ -53,21 +61,43 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
         }
     };
 
+    const handleMessage = () => {
+        console.log("Message clicked");
+    };
+
+    const handleFollow = () => {
+        console.log("Follow clicked");
+    };
+
+    const handleSearch = () => {
+        console.log("Search clicked");
+    };
+
     return (
         <div className="relative w-full bg-background border-b">
             <div className="relative h-60 w-full bg-muted flex items-center justify-center overflow-hidden">
                 {coverImageUrl ? (
-                    <Image src={coverImageUrl} alt="Cover" className="w-full h-full object-cover" />
+                    <Image src={coverImageUrl} alt="Cover" width={1200} height={400} className="w-full h-full object-cover" />
                 ) : (
                     <div className="text-muted-foreground text-sm">No cover image added</div>
                 )}
-                {isOwnProfile && (
-                    <button
-                        onClick={() => coverInputRef.current?.click()}
-                        className="absolute bottom-4 right-4 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-md flex items-center gap-2 text-xs font-medium backdrop-blur-sm transition z-10"
-                    >
-                        <Camera className="w-4 h-4" /> Change Cover
-                    </button>
+
+                {profile?.ownProfile && (
+                    coverImageUrl ? (
+                        <button
+                            onClick={() => coverInputRef.current?.click()}
+                            className="absolute bottom-4 right-4 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-md flex items-center gap-2 text-xs font-medium backdrop-blur-sm transition z-10"
+                        >
+                            <Pencil className="w-4 h-4" /> Edit Cover
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => coverInputRef.current?.click()}
+                            className="absolute bottom-4 right-4 bg-background/80 hover:bg-background border text-foreground p-2 rounded-full shadow-md flex items-center gap-2 text-xs font-medium backdrop-blur-sm transition z-10"
+                        >
+                            <ImagePlus className="w-4 h-4" /> Add Cover Photo
+                        </button>
+                    )
                 )}
                 <input type="file" ref={coverInputRef} onChange={(e) => handleFileChange(e, 'cover')} className="hidden" accept="image/*" />
 
@@ -79,21 +109,12 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
             </div>
 
             <div className="max-w-5xl mx-auto px-4 pb-6 relative flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16">
-                <div className="relative w-32 h-32 rounded-full border-4 border-background bg-muted flex items-center justify-center overflow-hidden shadow-lg group">
+                <div className="relative w-35 h-35 rounded-full border-4 border-blue-700 p-1 bg-muted flex items-center justify-center overflow-hidden shadow-lg group">
                     {avatarImageUrl ? (
-                        <Image src={avatarImageUrl} alt="Avatar" className="w-full h-full object-cover" />
+                        <Image src={avatarImageUrl} width={200} height={200} alt="Avatar" className="w-full h-full object-cover rounded-full" />
                     ) : (
-                        <div className="text-xl font-bold uppercase text-muted-foreground">{name?.substring(0, 2)}</div>
+                        <div className="text-xl font-bold uppercase text-muted-foreground">{profile?.aliasName?.substring(0, 2)}</div>
                     )}
-                    {isOwnProfile && (
-                        <button
-                            onClick={() => avatarInputRef.current?.click()}
-                            className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200 z-10"
-                        >
-                            <Camera className="w-5 h-5" />
-                        </button>
-                    )}
-                    <input type="file" ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} className="hidden" accept="image/*" />
 
                     {isUploading && activeUploadType === 'avatar' && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
@@ -102,12 +123,76 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
                     )}
                 </div>
 
+                {ownProfile && (
+                    <button
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="absolute left-30 sm:left-28 bottom-19 sm:bottom-6 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-md flex items-center justify-center transition z-10"
+                        aria-label={avatarImageUrl ? "Edit profile photo" : "Add profile photo"}
+                    >
+                        {avatarImageUrl ? <Pencil className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    </button>
+                )}
+                <input type="file" ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} className="hidden" accept="image/*" />
+
                 <div className="text-center sm:text-left mb-2 flex-1">
                     <h1 className="text-2xl font-bold flex items-center justify-center sm:justify-start gap-2">
-                        {name} {isVerified && <span className="text-blue-500 text-sm">✓</span>}
+                        {profile?.aliasName} {isVerified && <span className="text-blue-500 text-sm">✓</span>}
                     </h1>
                     {aliasName && <p className="text-sm text-muted-foreground">@{aliasName}</p>}
                 </div>
+
+                {!ownProfile ? (
+                    <div className="flex items-center gap-2 mb-2">
+                        <Button
+                            label="Message"
+                            icon={<MessageCircle className="w-4 h-4" />}
+                            variant="primary"
+                            fullWidth={false}
+                            onClick={handleMessage}
+                            className="h-10 px-4 text-sm"
+                            ariaLabel="Send message"
+                        />
+                        <Button
+                            label="Follow"
+                            icon={<UserPlus className="w-4 h-4" />}
+                            variant="secondary"
+                            fullWidth={false}
+                            onClick={handleFollow}
+                            className="h-10 px-4 text-sm"
+                            ariaLabel="Follow user"
+                        />
+                        <Button
+                            label="Search"
+                            icon={<Search className="w-4 h-4" />}
+                            variant="secondary"
+                            fullWidth={false}
+                            onClick={handleSearch}
+                            className="h-10 px-4 text-sm"
+                            ariaLabel="Search"
+                        />
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2 mb-2">
+                        <Button
+                            label="Add to story"
+                            icon={<Plus className="w-4 h-4" />}
+                            variant="primary"
+                            fullWidth={false}
+                            onClick={handleMessage}
+                            className="h-10 px-4 text-sm"
+                            ariaLabel="Add to story"
+                        />
+                        <Button
+                            label="Edit profile"
+                            icon={<Pencil className="w-4 h-4 text-black" />}
+                            variant="secondary"
+                            fullWidth={false}
+                            onClick={handleFollow}
+                            className="h-11 text-sm border border-gray-400 bg-gray-400"
+                            ariaLabel="Edit profile"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
