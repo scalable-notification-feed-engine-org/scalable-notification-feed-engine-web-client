@@ -34,11 +34,12 @@ export default function Sidebar() {
 
             <ul className="flex flex-col gap-1">
                 {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-                    const active = pathname === href;
+                    const finalHref = label === "Profile" ? `/profile/${user?.id}/${user?.firstName}` : href;
+                    const active = pathname === finalHref;
                     return (
-                        <li key={href}>
+                        <li key={label}>
                             <Link
-                                href={href}
+                                href={finalHref}
                                 aria-current={active ? "page" : undefined}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-saas text-sm font-medium transition-colors ${
                                     active ? "bg-brand/10 text-brand" : "text-foreground hover:bg-card"
