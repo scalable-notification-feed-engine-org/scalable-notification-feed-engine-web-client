@@ -9,25 +9,27 @@ import SuggestedPeople from "@/components/ui/SuggestedPeople";
 import { ProfileData } from "@/types/profile";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useParams } from "next/navigation";
 
 export default function ProfilePage() {
     const { token, user } = useAuth();
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [activeTab, setActiveTab] = useState("About");
     const [isLoading, setIsLoading] = useState(true);
-
+    const params = useParams();
     const currentToken = typeof token === 'function' ? token() : token;
     const userId = user?.id;
+    const targetId = Array.isArray(params.id) ? params.id[0] : (params.id ?? userId);
+    const targetUserName = Array.isArray(params.username) ? params.username[1] : (params.username ?? "Default");
 
     const fetchProfile = useCallback(async () => {
-        if (!currentToken || !userId) {
+        if (!currentToken || !targetId) {
             setIsLoading(false);
             return;
         }
-
         try {
             setIsLoading(true);
-            const response = await axios.get(`http://localhost:9090/api/v1/profiles/${userId}`, {
+            const response = await axios.get(`http://localhost:9090/api/v1/profiles/${targetId}`, {
                 withCredentials: true,
                 headers: {
                     'Authorization': `Bearer ${currentToken}`,
@@ -36,28 +38,49 @@ export default function ProfilePage() {
                 }
             });
             setProfile(response.data);
+
         } catch (err) {
             console.warn("Profile not found in DB, fallback to generating client-side default profile UI.");
-            const defaultProfile: ProfileData = {
-                followersCount: 0,
-                followingCount: 0,
-                isOwnProfile: false,
-                id: userId,
-                name: `${user?.firstName || ''} ${user?.firstName || ''}`.trim() || "New User",
-                aliasName: user?.firstName || "",
-                bioLines: ["Welcome to your new profile! Click edit to add a bio."],
-                category: "Member",
-                location: "Not Specified",
-                avatarImageKey: null,
-                coverImageKey: null,
-                suggestedPeople: []
-            };
+            if (targetId === userId) {
+                const defaultProfile: ProfileData = {
+                    followersCount: 0,
+                    followingCount: 0,
+                    ownProfile: true,
+                    id: userId,
+                    name: `${user?.firstName || ''} ${user?.firstName || ''}`.trim() || "New User",
+                    aliasName: user?.firstName || "",
+                    bioLines: ["Welcome to your new profile! Click edit to add a bio."],
+                    category: "Member",
+                    location: "Not Specified",
+                    avatarImageKey: profile?.avatarImageKey,
+                    coverImageKey: profile?.coverImageKey,
+                    suggestedPeople: [],
+                    currentUserId: userId
+                };
+                setProfile(defaultProfile);
+            } else {
+                const defaultProfile: ProfileData = {
+                    followersCount: 0,
+                    followingCount: 0,
+                    ownProfile: false,
+                    id: targetId,
+                    name: `${targetUserName || ''} ${targetUserName || ''}`.trim() || "New User",
+                    aliasName: targetUserName || "",
+                    bioLines: ["Welcome to your new profile! Click edit to add a bio."],
+                    category: "Member",
+                    location: "Not Specified",
+                    avatarImageKey: null,
+                    coverImageKey: null,
+                    suggestedPeople: [],
+                    currentUserId: userId
+                };
 
-            setProfile(defaultProfile);
+                setProfile(defaultProfile);
+            }
         } finally {
             setIsLoading(false);
         }
-    }, [currentToken, userId, user]);
+    }, [currentToken, targetId, userId, user?.firstName, profile?.avatarImageKey, profile?.coverImageKey, targetUserName]);
 
     const handleProfileUpdate = async (updatedData: Partial<ProfileData>) => {
         if (!currentToken || !userId) return;
@@ -110,13 +133,12 @@ export default function ProfilePage() {
     };
 
     useEffect(() => {
-        console.log("IMAGE", )
-        if (currentToken && userId) {
+        if (currentToken && targetId) {
             fetchProfile();
         } else {
             setIsLoading(false);
         }
-    }, [currentToken, userId, fetchProfile]);
+    }, [currentToken, targetId, fetchProfile]);
 
     if (isLoading) {
         return (
