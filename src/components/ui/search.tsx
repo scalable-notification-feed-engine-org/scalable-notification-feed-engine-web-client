@@ -1,8 +1,9 @@
 "use client";
 import { Search, Loader2} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import apiClient from "@/lib/api-client";
+import {useRouter} from "next/navigation";
 
 interface SearchInputProps {
     placeholder?: string;
@@ -23,8 +24,7 @@ function hueForName(name: string) {
     return AVATAR_HUES[Math.abs(hash) % AVATAR_HUES.length];
 }
 
-export function SearchInput({
-                                placeholder = "Search...",
+export function SearchInput({placeholder = "Search...",
                                 value,
                                 onChange
                             }: SearchInputProps) {
@@ -35,6 +35,7 @@ export function SearchInput({
     const [isFocused, setIsFocused] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const debouncedSearchQuery = useDebounce(value, 400);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -46,7 +47,6 @@ export function SearchInput({
             setQuery(value)
             try {
                 const response = await apiClient.get(`/users/visitors/get-all-user-details?searchText=${debouncedSearchQuery}`);
-                console.log("Response", response.data.data);
                 setSearchResults(response.data.data || []);
             } catch (error) {
                 console.error("Error fetching users:", error);
@@ -123,15 +123,7 @@ export function SearchInput({
                     placeholder={placeholder}
                     className="flex-1 min-w-0 bg-transparent outline-none text-sm text-foreground placeholder:text-muted"
                 />
-                    <button
-                        type="button"
-                        aria-label="Clear search"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => { onChange?.(""); setSearchResults([]); }}
-                        className="shrink-0 w-4 h-4 flex items-center justify-center rounded-full text-muted hover:text-foreground"
-                    >
 
-                    </button>
             </div>
 
             {isOpen && (
@@ -160,12 +152,13 @@ export function SearchInput({
                                         aria-selected={i === highlightedIndex}
                                         onMouseEnter={() => setHighlightedIndex(i)}
                                         onMouseDown={(e) => e.preventDefault()}
-                                        className={`w-full text-left px-2 py-2 rounded-xl transition-colors flex items-center gap-3 ${
+                                        className={`w-full text-left px-2 py-2  cursor-pointer rounded-xl transition-colors flex items-center gap-3 ${
                                             i === highlightedIndex ? "bg-background" : "hover:bg-background"
                                         }`}
                                         onClick={() => {
                                             setQuery(user.firstName)
                                             setSearchResults([]);
+                                            router.push(`/profile/${user.id}/${user.firstName}`)
                                         }}
                                     >
                                         <span
