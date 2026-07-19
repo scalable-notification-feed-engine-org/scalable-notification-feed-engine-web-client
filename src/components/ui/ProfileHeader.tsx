@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useRef } from "react";
+import React, {useState, useRef, useEffect} from "react";
 import { ProfileData } from "@/types/profile";
 import { Loader2, MessageCircle, UserPlus, Search, Pencil, Plus, ImagePlus } from "lucide-react";
 import { useProfileUpload } from "@/hooks/user-profile-upload";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import {useAuth} from "@/context/AuthContext";
+import axios from "axios";
 
 interface ProfileHeaderProps {
     profile: ProfileData | null;
@@ -29,7 +30,31 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const coverInputRef = useRef<HTMLInputElement>(null);
-    const {user} = useAuth();
+    const {user, token} = useAuth();
+    const currentToken = typeof token === 'function' ? token() : token;
+    const[isFollowing,setIsFollowing] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (profile?.id && currentToken) {
+            console.log("HELLO USE EFFECT")
+            axios.get(`http://localhost:9090/api/v1/follows/check/${profile.id}`, {
+
+                headers: {
+                    'Authorization': `Bearer ${currentToken}`,
+                    'X-User-Id': user?.id
+                }
+            })
+                .then(res => {
+                    console.log("MESSAGE", res.data)
+                    setIsFollowing(res.data)
+
+                })
+                .catch(err => {
+                    console.error("Check status failed:", err);
+                })
+
+        }
+    }, [profile?.id, currentToken, user?.id]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
         const file = e.target.files?.[0];
@@ -65,8 +90,30 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
         console.log("Message clicked");
     };
 
-    const handleFollow = () => {
-        console.log("Follow clicked");
+    const handleFollow = async (followeeId: string) => {
+        if (!profile?.id) return;
+
+        const previousState = isFollowing;
+        const nextState = !isFollowing;
+
+        setIsFollowing(nextState);
+
+        try {
+            const endpoint = previousState
+                ? `http://localhost:9090/api/v1/follows/unfollow/${followeeId}`
+                : `http://localhost:9090/api/v1/follows/follow/${followeeId}`;
+
+            await axios.post(endpoint, {}, {
+                headers: {
+                    'Authorization': `Bearer ${currentToken}`,
+                    'X-User-Id': user?.id
+                }
+            });
+
+        } catch (error) {
+            console.error("Follow action failed:", error);
+            setIsFollowing(previousState);
+        }
     };
 
     const handleSearch = () => {
@@ -153,13 +200,13 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
                             ariaLabel="Send message"
                         />
                         <Button
-                            label="Follow"
+                            label={isFollowing ? "Unfollow" : "Follow"}
                             icon={<UserPlus className="w-4 h-4" />}
-                            variant="secondary"
+                            variant="primary"
                             fullWidth={false}
-                            onClick={handleFollow}
+                            onClick={() => profile?.id && handleFollow(profile.id)}
                             className="h-10 px-4 text-sm"
-                            ariaLabel="Follow user"
+                            ariaLabel={isFollowing ? "Unfollow user" : "Follow user"}
                         />
                         <Button
                             label="Search"
@@ -187,7 +234,6 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
                             icon={<Pencil className="w-4 h-4 text-black" />}
                             variant="secondary"
                             fullWidth={false}
-                            onClick={handleFollow}
                             className="h-11 text-sm border border-gray-400 bg-gray-400"
                             ariaLabel="Edit profile"
                         />
