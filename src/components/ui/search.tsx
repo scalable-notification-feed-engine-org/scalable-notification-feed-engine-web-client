@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import apiClient from "@/lib/api-client";
 import {useRouter} from "next/navigation";
+import {useAuth} from "@/context/AuthContext";
 
 interface SearchInputProps {
     placeholder?: string;
@@ -14,6 +15,7 @@ interface SearchInputProps {
 interface UserSearchResult {
     id: string;
     firstName: string;
+    following: boolean;
 }
 
 const AVATAR_HUES = [262, 210, 340, 25, 160, 285];
@@ -36,6 +38,7 @@ export function SearchInput({placeholder = "Search...",
     const inputRef = useRef<HTMLInputElement>(null);
     const debouncedSearchQuery = useDebounce(value, 400);
     const router = useRouter();
+    const {user} = useAuth();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -46,7 +49,12 @@ export function SearchInput({placeholder = "Search...",
             setIsSearching(true);
             setQuery(value)
             try {
-                const response = await apiClient.get(`/users/visitors/get-all-user-details?searchText=${debouncedSearchQuery}`);
+                const response = await apiClient.get(`/users/visitors/get-all-user-details?searchText=${debouncedSearchQuery}`, {
+                    headers: {
+                        'X-User-Id': user?.id
+                    }
+                });
+                console.log("RESPONSE HEADER", response)
                 setSearchResults(response.data.data || []);
             } catch (error) {
                 console.error("Error fetching users:", error);
@@ -55,7 +63,7 @@ export function SearchInput({placeholder = "Search...",
             }
         };
         fetchUser();
-    }, [debouncedSearchQuery, value]);
+    }, [debouncedSearchQuery, user?.id, value]);
 
     useEffect(() => {
         setHighlightedIndex(-1);
@@ -158,7 +166,7 @@ export function SearchInput({placeholder = "Search...",
                                         onClick={() => {
                                             setQuery(user.firstName)
                                             setSearchResults([]);
-                                            router.push(`/profile/${user.id}/${user.firstName}`)
+                                            router.push(`/profile/${user.id}/${user.firstName}`);
                                         }}
                                     >
                                         <span
