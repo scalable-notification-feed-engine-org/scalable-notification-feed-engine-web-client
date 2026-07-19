@@ -20,6 +20,16 @@ export function middleware(request:NextRequest){
         }
     }
 
+
+    if (pathname === '/') {
+        if (!token) {
+            return NextResponse.redirect(new URL('/login', request.url));
+        } else {
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+    }
+
+
     if(pathname.startsWith('/dashboard')){
 
         if(!token || isTokenExpired) {
@@ -37,9 +47,10 @@ export function middleware(request:NextRequest){
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
+
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ['/dashboard/:path*','/login', '/register'],
+    matcher: ['/dashboard/:path*','/login', '/register','/'],
 };
