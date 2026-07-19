@@ -142,7 +142,7 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
                             onClick={() => coverInputRef.current?.click()}
                             className="absolute bottom-4 right-4 bg-background/80 hover:bg-background border text-foreground p-2 rounded-full shadow-md flex items-center gap-2 text-xs font-medium backdrop-blur-sm transition z-10"
                         >
-                            <ImagePlus className="w-4 h-4" /> Add Cover Photo
+                            <ImagePlus className="w-4 h-4" />  Add Cover Photo
                         </button>
                     )
                 )}
