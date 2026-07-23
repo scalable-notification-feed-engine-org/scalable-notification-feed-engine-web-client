@@ -20,28 +20,12 @@ export const PostList = ({ initialPosts }: PostListProps) => {
 
 
 
-    const handleLikeToggle = async (postId: string) => {
+    const handleLikeToggle = async (postId: string)=> {
         if (!user) return;
-
-        const originalPosts = [...posts];
-
-        setPosts(currentPosts =>
-            currentPosts.map(post => {
-                if (post.id === postId) {
-                    return {
-                        ...post,
-                        likeCount:(post.likeCount || 0) + 1
-                    };
-                }
-                return post;
-            })
-        );
-
         try {
-            await postService.toggleLike(postId, user.id);
+          await postService.toggleLike(postId, user.id);
         } catch (error) {
             console.error("Like failed, rolling back:", error);
-            setPosts(originalPosts);
         }
     };
 
