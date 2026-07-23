@@ -20,11 +20,13 @@ export const postService = {
    },
 
 
-    async toggleLike(postId: string, userId:string){
+    async toggleLike(postId: string, loginUserId: string){
         const response = await fetch(`${API_BASE_URL}/${postId}/like`,{
             method: 'POST',
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({userId}),
+            headers: {
+                "Content-Type": "application/json",
+                "x-user-id": loginUserId
+            },
         });
 
         if (!response.ok) {
