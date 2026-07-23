@@ -31,7 +31,8 @@ export default function Dashboard() {
         fetchPolicy: 'network-only',
         context: {
             headers: {
-                "X-Tenant-ID": activeTenant?.id
+                "X-Tenant-ID": activeTenant?.id,
+                'x-user-id': user?.id || '',
             }
         },
         skip: !activeTenant
