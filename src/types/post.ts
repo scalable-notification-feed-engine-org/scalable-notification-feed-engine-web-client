@@ -16,7 +16,7 @@ export interface Post {
     content: string;
     tenantId: string;
     mediaUrls?: string[];
-    isLiked:boolean;
+    isLike:boolean;
     createdAt: string | Date;
     likeCount: number;
     commentCount: number;
