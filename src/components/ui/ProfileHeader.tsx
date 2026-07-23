@@ -36,7 +36,6 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
 
     useEffect(() => {
         if (profile?.id && currentToken) {
-            console.log("HELLO USE EFFECT")
             axios.get(`http://localhost:9090/api/v1/follows/check/${profile.id}`, {
 
                 headers: {
@@ -45,12 +44,11 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
                 }
             })
                 .then(res => {
-                    console.log("MESSAGE", res.data)
                     setIsFollowing(res.data)
 
                 })
                 .catch(err => {
-                    console.error("Check status failed:", err);
+                    console.error("Check status failed:", err.message);
                 })
 
         }
@@ -90,7 +88,7 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
         console.log("Message clicked");
     };
 
-    const handleFollow = async (followeeId: string) => {
+    const handleFollow = async () => {
         if (!profile?.id) return;
 
         const previousState = isFollowing;
@@ -100,8 +98,8 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
 
         try {
             const endpoint = previousState
-                ? `http://localhost:9090/api/v1/follows/unfollow/${followeeId}`
-                : `http://localhost:9090/api/v1/follows/follow/${followeeId}`;
+                ? `http://localhost:9090/api/v1/follows/unfollow/${profile.id}`
+                : `http://localhost:9090/api/v1/follows/follow/${profile.id}`;
 
             await axios.post(endpoint, {}, {
                 headers: {
@@ -204,7 +202,7 @@ export default function ProfileHeader({ profile, accessToken, onProfileUpdate }:
                             icon={<UserPlus className="w-4 h-4" />}
                             variant="primary"
                             fullWidth={false}
-                            onClick={() => profile?.id && handleFollow(profile.id)}
+                            onClick={handleFollow}
                             className="h-10 px-4 text-sm"
                             ariaLabel={isFollowing ? "Unfollow user" : "Follow user"}
                         />
