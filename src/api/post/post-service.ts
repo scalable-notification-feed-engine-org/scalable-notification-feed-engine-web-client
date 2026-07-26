@@ -36,10 +36,11 @@ export const postService = {
     },
 
 
-    async addComment(postId: string, userId: string, content: string) {
+    async addComment(postId: string, userId: string, userName: string, content: string) {
 
       const createCommentDto = {
           userId: userId,
+          userName: userName,
           content: content,
       }
 
@@ -50,8 +51,7 @@ export const postService = {
                headers: {"Content-Type": "application/json"},
                body: JSON.stringify(createCommentDto),
             });
-
-            return response.json();
+            return  response.json();
         } catch (error) {
             console.error("Error adding comment:", error);
             throw error;
