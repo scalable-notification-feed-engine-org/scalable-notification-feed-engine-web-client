@@ -1,4 +1,4 @@
-'use client';
+
 
 import {useEffect, useState} from 'react';
 import {Post, PostComment} from '@/types/post';
@@ -46,7 +46,7 @@ export const PostList = ({ initialPosts }: PostListProps) => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto px-4 py-6">
+        <div className="max-w-2xl mx-auto px-4 py-6 w-full">
             <div className="space-y-2">
                 {posts.map((post) => (
                     <PostCard
