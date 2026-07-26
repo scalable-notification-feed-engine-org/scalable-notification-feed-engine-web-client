@@ -9,6 +9,9 @@ export interface PostComment {
     id: string;
     content: string;
     userId: string;
+    createdAt?: string | Date;
+    userName: string;
+    author?: User
 }
 
 export interface Post {
@@ -17,6 +20,7 @@ export interface Post {
     tenantId: string;
     mediaUrls?: string[];
     isLike:boolean;
+    userName:string;
     createdAt: string | Date;
     likeCount: number;
     commentCount: number;
