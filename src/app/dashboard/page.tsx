@@ -62,16 +62,13 @@ export default function Dashboard() {
         };
 
         fetchData();
-    }, [token, user?.id, activeTenant, data]);
+    }, [token, user?.id, activeTenant]);
 
     return (
-        <div className="flex flex-col lg:flex-row gap-8 px-4 lg:px-6 py-6 ">
 
-            <div className="flex-1 min-w-0">
-                <h1 className="text-2xl font-semibold text-foreground mb-6" style={{ fontFamily: "var(--font-display)" }}>
-                    {activeTenant ? `${activeTenant.name} feed` : 'Activity feed'}
-                </h1>
-
+        <div className="flex flex-col lg:flex-row gap-8 px-4 lg:px-6 py-6">
+            <div className="flex-1 justify-center items-center min-w-0">
+                <div className="flex flex-col items-center justify-center">
                 {activeTenant ? (
                     <>
                         <PostComposerTrigger />
@@ -86,6 +83,7 @@ export default function Dashboard() {
                         <p className="text-muted">Select a group to view its feed.</p>
                     </div>
                 )}
+                </div>
             </div>
 
         </div>
